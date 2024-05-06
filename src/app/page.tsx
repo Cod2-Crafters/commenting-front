@@ -1,25 +1,36 @@
-import Image from 'next/image'
+import { LoginButton } from "@/components/auth/login-button"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { Poppins } from "next/font/google"
+
+
+const font = Poppins({
+  subsets: ["latin"],
+  weight: ["600"]
+})
 
 export default function Home() {
 
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <span className='text-blue-500'>
-        <h1>홈 페이지</h1>
-        <h2>인증 없이 못보는 화면</h2>
-        <form
-        // action={async () => {
-        // // 추후에 추가될 로그아웃 메소드
-        // 'use server';
-        //  await signOut();
-        // }}
-        >
-          <button>
-            로그아웃
-          </button>
-        </form>
-      </span>
-    </main >
+    <main className="flex h-full felx-col items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-400 to-blue-800">
+      <div className="space-y-6 text-center">
+        <h1 className={cn("text-6xl font-semibold text-white drop-shadow-md",
+          font.className,
+        )}>
+          🔐 Auth
+        </h1>
+        <p className="text-white text-lg">
+          A simple authentiaction service
+        </p>
+        <div>
+          <LoginButton >
+            <Button variant="secondary" size="lg">
+              Sign in
+            </Button>
+          </LoginButton>
+        </div>
+      </div>
+    </main>
   )
 }
