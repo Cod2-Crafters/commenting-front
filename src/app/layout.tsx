@@ -1,3 +1,4 @@
+import Header from '@/components/common/Header'
 import AuthProvider from '@/providers/next-auth'
 import '@/styles/globals.css'
 import type { Metadata } from 'next'
@@ -58,6 +59,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${pretendard.variable}`}>
       <body>
+        <Header />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
