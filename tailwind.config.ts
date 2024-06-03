@@ -16,11 +16,12 @@ const config = {
     container: {
       center: true,
       padding: '2rem',
-      screens: {
-        '2xl': '1400px',
-      },
     },
     extend: {
+      screens: {
+        ...defaultTheme.screens,
+        sm: '300px',
+      },
       transitionProperty: {
         height: 'height',
         width: 'width',
@@ -65,7 +66,7 @@ const config = {
         },
         muted: {
           DEFAULT: 'var(--muted)',
-          foreground: 'hsl(var(--muted-foreground))',
+          foreground: 'var(--muted-foreground)',
         },
         accent: {
           DEFAULT: 'hsl(var(--accent))',
