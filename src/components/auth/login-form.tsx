@@ -22,6 +22,9 @@ import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import { login } from "@/actions/login";
 import { useState, useTransition } from "react";
+import Link from 'next/link'
+import Image from "next/image";
+
 
 export const LoginForm = () => {
     const [error, setError] = useState<string | undefined>("");
@@ -31,7 +34,7 @@ export const LoginForm = () => {
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
         defaultValues: {
-            email: "",
+            id: "",
             password: ""
         }
     })
@@ -49,13 +52,14 @@ export const LoginForm = () => {
         })
     }
 
+    const handleOAuthLogin = (event: React.MouseEvent<HTMLButtonElement>, provider: string) => {
+        event.preventDefault();
+        console.log(provider);
+    }
+
     return (
-        <CardWrapper
-            headerLabel="Welcome back"
-            backButtonLabel="Don't have an account?"
-            backButtonHref="/auth/register"
-            showSocial
-        >
+        <div>
+            <h1 className="text-[25px] font-semibold text-center text-white pb-[20px]">코멘팅 로그인</h1>
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
@@ -64,18 +68,16 @@ export const LoginForm = () => {
                     <div className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="email"
+                            name="id"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>
-                                        Email
-                                    </FormLabel>
                                     <FormControl>
                                         <Input
                                             disabled={isPending}
                                             {...field}
-                                            placeholder="salki@example.com"
-                                            type="email"
+                                            placeholder="아이디"
+                                            // type="email"
+                                            className="bg-surface w-[462px] h-[62.35px] rounded-md"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -87,15 +89,13 @@ export const LoginForm = () => {
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>
-                                        Password
-                                    </FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
                                             disabled={isPending}
-                                            placeholder="******"
+                                            placeholder="비밀번호"
                                             type="password"
+                                            className="bg-surface w-[462px] h-[62.35px] rounded-md"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -108,12 +108,30 @@ export const LoginForm = () => {
                     <Button
                         disabled={isPending}
                         type="submit"
-                        className="w-full"
+                        className="w-[462px] h-[62.35px] rounded-md text-black text-[18px]"
                     >
-                        Login
+                        로그인
                     </Button>
+                    <div className="flex flex-row justify-center mt-4 space-x-10">
+                        <Link href="/find-id-pw" className="text-white">ID/PW찾기</Link>
+                        <Link href="/auth/register" className="text-white">회원가입</Link>
+                    </div>
+                    <div className="flex justify-center mt-10 space-x-20">
+                        <button
+                            onClick={(e) => handleOAuthLogin(e, 'naver')}
+                            className="w-12 h-12 bg-white rounded-full flex items-center justify-center"
+                        >
+                            <Image src="/icons/naver.png" alt="네이버 로그인" width={50} height={50} />
+                        </button>
+                        <button
+                            onClick={(e) => handleOAuthLogin(e, 'kakao')}
+                            className="w-12 h-12 bg-white rounded-full flex items-center justify-center"
+                        >
+                            <Image src="/icons/kakao.png" alt="카카오톡 로그인" width={50} height={50} />
+                        </button>
+                    </div>
                 </form>
             </Form>
-        </CardWrapper>
+        </div>
     )
 }

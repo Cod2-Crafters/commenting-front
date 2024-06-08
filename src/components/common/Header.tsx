@@ -1,5 +1,5 @@
 'use client'
-interface HeaderProps {}
+interface HeaderProps { }
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -7,7 +7,7 @@ import HamburgerIcon from '/public/assets/ham.svg'
 
 const Header = (props: HeaderProps) => {
   return (
-    <header className="bg-background">
+    <header className="fixed top-0 left-0 w-full bg-background">
       <div className="flex max-w-[1230px] m-auto py-8 justify-between items-center px-2">
         <Link href={'/'}>
           <h2 className="text-primary font-light text-2xl">
