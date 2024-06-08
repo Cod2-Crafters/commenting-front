@@ -1,6 +1,4 @@
 "use client"
-
-
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,8 +11,6 @@ import {
     FormLabel,
     FormMessage
 } from "@/components/ui/form"
-
-
 import { CardWrapper } from "@/components/auth/card-wrapper"
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -31,8 +27,11 @@ export const RegisterForm = () => {
     const form = useForm<z.infer<typeof RegisterSchema>>({
         resolver: zodResolver(RegisterSchema),
         defaultValues: {
+            id: "",
             email: "",
+            emailAuth: "",
             password: "",
+            passwordConfirm: "",
             name: ""
         }
     })
@@ -51,31 +50,101 @@ export const RegisterForm = () => {
     }
 
     return (
-        <CardWrapper
-            headerLabel="Create an account"
-            backButtonLabel="Already have an account?"
-            backButtonHref="/auth/login"
-            showSocial
-        >
+        <div className="w-[580px] mt-10 ">
+            <h1 className="text-[25px] font-semibold text-center text-white pb-[20px]">코멘팅 회원가입</h1>
+            <hr className="border-primary" />
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6"
+                    className="mt-10 space-y-6"
                 >
                     <div className="space-y-4">
+                        <FormField
+                            control={form.control}
+                            name="id"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-white">
+                                        아이디
+                                    </FormLabel>
+                                    <div className="flex space-x-2">
+                                        <FormControl>
+                                            <Input
+                                                disabled={isPending}
+                                                {...field}
+                                                placeholder="아이디 입력"
+                                                className="bg-surface h-[60px]"
+                                            />
+                                        </FormControl>
+                                        <Button
+                                            type="button"
+                                            className="bg-black text-white h-[60px] border border-white w-[200px]"
+                                            onClick={() => console.log('아이디 중복 확인')}
+                                        >
+                                            중복 확인
+                                        </Button>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-white">
+                                        비밀번호
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                            disabled={isPending}
+                                            placeholder="(영문 대소문자/숫자/특수문자 중 2가지 이상 조합, 10자~16자)"
+                                            type="password"
+                                            className="bg-surface h-[60px]"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="passwordConfirm"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-white">
+                                        비밀번호
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                            disabled={isPending}
+                                            placeholder="(영문 대소문자/숫자/특수문자 중 2가지 이상 조합, 10자~16자)"
+                                            type="password"
+                                            className="bg-surface h-[60px]"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             control={form.control}
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>
-                                        Name
+                                    <FormLabel className="text-white">
+                                        이름
                                     </FormLabel>
                                     <FormControl>
                                         <Input
                                             disabled={isPending}
                                             {...field}
-                                            placeholder="John salki"
+                                            placeholder="이름 입력"
+                                            className="bg-surface h-[60px]"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -87,37 +156,55 @@ export const RegisterForm = () => {
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>
-                                        Email
+                                    <FormLabel className="text-white">
+                                        이메일
                                     </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            disabled={isPending}
-                                            {...field}
-                                            placeholder="salki@example.com"
-                                            type="email"
-                                        />
-                                    </FormControl>
+                                    <div className="flex space-x-2">
+                                        <FormControl>
+                                            <Input
+                                                disabled={isPending}
+                                                {...field}
+                                                type="email"
+                                                className="bg-surface h-[60px]"
+                                            />
+                                        </FormControl>
+                                        <Button
+                                            type="button"
+                                            className="bg-black text-white h-[60px] border border-white w-[200px]"
+                                            onClick={() => console.log('인증요청')}
+                                        >
+                                            인증요청
+                                        </Button>
+                                    </div>
+
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
                         <FormField
                             control={form.control}
-                            name="password"
+                            name="emailAuth"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>
-                                        Password
+                                    <FormLabel className="text-white">
+                                        이메일 인증번호 입력
                                     </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                            disabled={isPending}
-                                            placeholder="******"
-                                            type="password"
-                                        />
-                                    </FormControl>
+                                    <div className="flex space-x-2">
+                                        <FormControl>
+                                            <Input
+                                                disabled={isPending}
+                                                {...field}
+                                                className="bg-surface h-[60px]"
+                                            />
+                                        </FormControl>
+                                        <Button
+                                            type="button"
+                                            className="bg-black text-white h-[60px] border border-white w-[200px]"
+                                            onClick={() => console.log('인증확인')}
+                                        >
+                                            인증확인
+                                        </Button>
+                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -128,12 +215,12 @@ export const RegisterForm = () => {
                     <Button
                         disabled={isPending}
                         type="submit"
-                        className="w-full"
+                        className="w-full h-[60px] text-black text-[18px]"
                     >
-                        Create an account
+                        회원가입
                     </Button>
                 </form>
             </Form>
-        </CardWrapper>
+        </div>
     )
 }

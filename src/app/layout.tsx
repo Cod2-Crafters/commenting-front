@@ -57,10 +57,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${pretendard.variable}`}>
-      <body>
+    <html lang="en" className={`${pretendard.variable} h-full`}>
+      <body className='flex flex-col min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-modern-gray to-medium-gray h-full'>
         <Header />
-        <AuthProvider>{children}</AuthProvider>
+        <div className="pt-16 mt-16 flex-grow">
+          <AuthProvider>{children}</AuthProvider>
+        </div>
       </body>
     </html>
   )
