@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
@@ -20,11 +21,11 @@ export async function decrypt(input: string): Promise<any> {
 }
 
 export async function login(formData: FormData) {
-  const user = { email: formData.get('email'), name: 'salki' }
+  const user = { email: formData.get('email'), token : formData.get('token') }
 
   const expires = new Date(Date.now() + 10 * 1000)
   const session = await encrypt({ user, expires })
-
+  
   cookies().set('session', session, { expires, httpOnly: true })
 }
 
