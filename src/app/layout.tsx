@@ -4,6 +4,9 @@ import '@/styles/globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
+// import { Provider } from 'react-redux';
+// import {store} from '@/store'
+
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -58,12 +61,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${pretendard.variable} h-full`}>
-      <body className='flex flex-col min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-modern-gray to-medium-gray h-full'>
-        <Header />
-        <div className="pt-16 mt-16 flex-grow">
-          <AuthProvider>{children}</AuthProvider>
-        </div>
-      </body>
+        <body className='flex flex-col min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-modern-gray to-medium-gray h-full'>
+          <AuthProvider>
+            <Header />
+            <div className="pt-16 mt-16 flex-grow">
+              {children}
+
+            </div>
+          </AuthProvider>
+        </body>
+
     </html>
   )
 }

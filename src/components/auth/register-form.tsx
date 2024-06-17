@@ -18,12 +18,14 @@ import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import { register } from "@/actions/register";
 import { useState, useTransition } from "react";
+import { useRouter } from 'next/navigation'
+
 
 export const RegisterForm = () => {
     const [error, setError] = useState<string | undefined>("");
     const [success, setSuccess] = useState<string | undefined>("");
     const [isPending, startTransition] = useTransition();
-
+    const router = useRouter(); 
     const form = useForm<z.infer<typeof RegisterSchema>>({
         resolver: zodResolver(RegisterSchema),
         defaultValues: {
@@ -41,12 +43,30 @@ export const RegisterForm = () => {
         setSuccess("");
 
         startTransition(() => {
-            register(values)
-                .then((data) => {
-                    setError(data.error);
-                    setSuccess(data.success);
+            fetch("http://13.125.249.102:8080/api/member/sign-up", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                  email: values.email,
+                  provider: "BASE",
+                  password: values.password
                 })
-        })
+              })
+                .then(async (response) => {
+                  const data = await response.json();
+                  if (response.ok) {
+                    setSuccess("회원가입이 성공적으로 완료되었습니다.");
+                    router.push('/auth/login'); 
+                  } else {
+                    setError(data.message || "회원가입에 실패했습니다.");
+                  }
+                })
+                .catch(() => {
+                  setError("네트워크 오류가 발생했습니다.");
+                });
+            });
     }
 
     return (
