@@ -21,11 +21,11 @@ export async function decrypt(input: string): Promise<any> {
 }
 
 export async function login(formData: FormData) {
-  const user = { email: formData.get('email'), token : formData.get('token') }
+  const user = { email: formData.get('email'), token: formData.get('token') }
 
   const expires = new Date(Date.now() + 10 * 1000)
   const session = await encrypt({ user, expires })
-  
+
   cookies().set('session', session, { expires, httpOnly: true })
 }
 
@@ -44,6 +44,7 @@ export async function updateSession(request: NextRequest) {
   if (!session) return
 
   const parsed = await decrypt(session)
+  console.log(parsed)
   parsed.expires = new Date(Date.now() + 10 * 1000)
   const res = NextResponse.next()
   res.cookies.set({
