@@ -16,11 +16,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
-// import { login } from "@/actions/login";
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import Link from 'next/link'
 import Image from "next/image";
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/app/auth/authSlice";
@@ -44,67 +42,67 @@ export const LoginForm = () => {
 
     useEffect(() => {
         const handleMessage = (event: { origin: string; data: { token: string; }; }) => {
-          if (event.origin !== "http://localhost:3000") return; 
-          const { token } = event.data;
-          if (token) {
-            console.log('Received token:', token);
-            
-          }
+            if (event.origin !== "http://localhost:3000") return;
+            const { token } = event.data;
+            if (token) {
+                console.log('Received token:', token);
+
+            }
         };
         window.addEventListener('message', handleMessage);
         return () => {
-          window.removeEventListener('message', handleMessage);
+            window.removeEventListener('message', handleMessage);
         };
-      }, [router]);
+    }, [router]);
 
     const onSubmit = (values: z.infer<typeof LoginSchema>) => {
         setError("");
         setSuccess("");
-        startTransition(()=>{
-            fetch("http://13.125.249.102:8080/api/member/sign-in",{
+        startTransition(() => {
+            fetch("http://13.125.249.102:8080/api/member/sign-in", {
                 method: "POST",
                 headers: {
-                    "Content-Type" : "application/json"
+                    "Content-Type": "application/json"
                 },
-                body : JSON.stringify({
-                    email : values.email,
+                body: JSON.stringify({
+                    email: values.email,
                     password: values.password,
                     provider: "BASE"
                 })
-            }).then(async (response)=>{
+            }).then(async (response) => {
                 const data = await response.json();
-                if(response.ok){
+                if (response.ok) {
                     setSuccess("로그인이 성공적으로 완료되었습니다.")
                     console.log(data);
-                    fetch("/api/login",{
+                    fetch("/api/login", {
                         method: "POST",
                         headers: {
-                            "Content-Type" : "application/json"
+                            "Content-Type": "application/json"
                         },
                         body: JSON.stringify({
-                            email : values.email,
-                            token : data.data.token
+                            email: values.email,
+                            token: data.data.token
                         })
                     })
-                    .then(async (cookieResponse)=> {
-                        console.log(cookieResponse);
-                        if(cookieResponse.ok){
-                            dispatch(setCredentials({
-                                user: {email : values.email},
-                                token : data.data.token
-                                // token : data
-                            }))
-                            router.push("/");
-                            // console.log("쿠키 set!");
-                        }
-                    })
+                        .then(async (cookieResponse) => {
+                            console.log(cookieResponse);
+                            if (cookieResponse.ok) {
+                                dispatch(setCredentials({
+                                    user: { email: values.email },
+                                    token: data.data.token
+                                    // token : data
+                                }))
+                                router.push("/");
+                                // console.log("쿠키 set!");
+                            }
+                        })
 
                     // console.log(data.data.token);  
                 }
-                else{
+                else {
                     setError(data.message || "로그인에 실패했습니다.")
                 }
-            }).catch(()=>{
+            }).catch(() => {
                 setError("네트워크 오류가 발생했습니다.");
             })
         })
