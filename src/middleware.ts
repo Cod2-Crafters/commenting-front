@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession, updateSession } from './lib/login'
-// import { runMiddleware } from './lib/cors'
-import Cors from 'cors'
 
-// CORS 미들웨어 초기화
-const cors = Cors({
-  methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE'],
-  origin: '*', // 모든 출처를 허용합니다. 특정 도메인만 허용하려면 이 부분을 변경하세요.
-  credentials: true,
-})
-
-// 미들웨어 실행을 도와주는 함수
 async function runMiddleware(req: NextRequest, fn: Function) {
   return new Promise((resolve, reject) => {
     fn(req, new Response(), (result: any) => {
@@ -27,7 +17,6 @@ export async function middleware(req: NextRequest) {
 
   const session = await getSession()
 
-  await runMiddleware(req, cors)
   //TODO
   // 특정 경로 타거나
   // 아무튼 익명 유저 페이지 볼 수 있어야함.
