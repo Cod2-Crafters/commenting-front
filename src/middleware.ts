@@ -1,21 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession, updateSession } from './lib/login'
 
-async function runMiddleware(req: NextRequest, fn: Function) {
-  return new Promise((resolve, reject) => {
-    fn(req, new Response(), (result: any) => {
-      if (result instanceof Error) {
-        return reject(result)
-      }
-      return resolve(result)
-    })
-  })
-}
-
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl
+  // const { pathname } = req.nextUrl
 
-  const session = await getSession()
+  // const session = await getSession()
 
   //TODO
   // 특정 경로 타거나
