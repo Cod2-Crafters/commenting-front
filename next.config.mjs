@@ -14,15 +14,15 @@ const nextConfig = {
         source: '/(.*)',
         headers: [
           { key: 'Access-Control-Allow-Credentials', value: 'true' },
-          { key: 'Access-Control-Allow-Origin', value: '*' }, // 필요한 경우 특정 도메인으로 변경
+          { key: 'Access-Control-Allow-Origin', value: '*' }, // replace this your actual origin
           {
             key: 'Access-Control-Allow-Methods',
-            value: 'GET,HEAD,OPTIONS,POST,PUT',
+            value: 'GET,DELETE,PATCH,POST,PUT',
           },
           {
             key: 'Access-Control-Allow-Headers',
             value:
-              'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+              'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
           },
         ],
       },
