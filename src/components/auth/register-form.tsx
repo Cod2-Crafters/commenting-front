@@ -81,7 +81,7 @@ export const RegisterForm = () => {
             return;
         }
 
-        fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/member/check-email?email=${email}`, {
+        fetch(process.env.NEXT_PUBLIC_SERVER_URL + `/api/member/check-email?email=${email}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
