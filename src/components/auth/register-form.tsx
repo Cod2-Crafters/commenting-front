@@ -44,7 +44,7 @@ export const RegisterForm = () => {
         setSuccess("");
 
         startTransition(() => {
-            fetch(process.env.NEXT_PUBLIC_SERVER_URL + "/api/member/sign-up", {
+            fetch("http://43.202.121.141:8080/api/member/sign-up", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -81,7 +81,7 @@ export const RegisterForm = () => {
             return;
         }
 
-        fetch(process.env.NEXT_PUBLIC_SERVER_URL + `/api/member/check-email?email=${email}`, {
+        fetch(`http://43.202.121.141:8080/api/member/check-email?email=${email}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json"

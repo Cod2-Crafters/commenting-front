@@ -59,7 +59,7 @@ export const LoginForm = () => {
         setError("");
         setSuccess("");
         startTransition(() => {
-            fetch("http://13.125.249.102:8080/api/member/sign-in", {
+            fetch("http://43.202.121.141:8080/api/member/sign-in", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
