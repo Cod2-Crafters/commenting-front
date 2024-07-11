@@ -62,7 +62,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${pretendard.variable} h-full`}>
       <head>
-        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+        <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
       </head>
       <body className='flex flex-col min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-modern-gray to-medium-gray h-full'>
         <AuthProvider>
