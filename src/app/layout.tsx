@@ -61,15 +61,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${pretendard.variable} h-full`}>
-        <body className='flex flex-col min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-modern-gray to-medium-gray h-full'>
-          <AuthProvider>
-            <Header />
-            <div className="pt-16 mt-16 flex-grow">
-              {children}
+      <head>
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+      </head>
+      <body className='flex flex-col min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-modern-gray to-medium-gray h-full'>
+        <AuthProvider>
+          <Header />
+          <div className="pt-16 mt-16 flex-grow">
+            {children}
 
-            </div>
-          </AuthProvider>
-        </body>
+          </div>
+        </AuthProvider>
+      </body>
 
     </html>
   )
