@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation'
 import { clearCredentials } from '@/app/auth/authSlice'
 
 const Header = (props: HeaderProps) => {
-  const token = useSelector((state:RootState) => state.auth.token);
+  const token = useSelector((state: RootState) => state.auth.token);
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -19,14 +19,15 @@ const Header = (props: HeaderProps) => {
   const logout = () => {
     fetch("/api/logout", {
       method: "POST",
-      headers : {
-        "Content-Type" : "application/json"
+      headers: {
+        "Content-Type": "application/json"
       }
     }).then(async (response) => {
       console.log(response)
-      if(response.ok){
+      if (response.ok) {
         dispatch(clearCredentials());
-      } 
+        window.location.reload();
+      }
     })
   }
   const login = () => {
@@ -43,27 +44,27 @@ const Header = (props: HeaderProps) => {
         <div className="cursor-pointer">
           <div className='flex items-center'>
             <div className='pr-10'>
-          <HamburgerIcon width={25} height={11} />
+              <HamburgerIcon width={25} height={11} />
+            </div>
+            {token ? (
+              <Button
+                className="w-[62px] h-[32px] text-black"
+                onClick={logout}
+              >
+                로그아웃
+              </Button>
+            ) : (
+              <Button
+                className="w-[62px] h-[32px] text-black"
+                onClick={login}
+              >
+                로그인
+              </Button>
+            )}
           </div>
-          {token ? (
-               <Button
-               className="w-[62px] h-[32px] text-black"
-               onClick={logout}
-           >
-               로그아웃
-           </Button>
-          ):(
-            <Button
-               className="w-[62px] h-[32px] text-black"
-               onClick={login}
-           >
-               로그인
-           </Button>
-          )}
-          </div>
-         
+
         </div>
-        
+
       </div>
       <hr className="border-muted outline-none" />
     </header>

@@ -20,7 +20,6 @@ export const RegisterSchema = z.object({
   // emailAuth: z.string().min(1, {
   //   message: '인증번호를 입력하세요',
   // }),
-  emailAuth: z.string(),
   password: z
     .string()
     // .min(10, '비밀번호는 최소 10자 이상이어야 합니다')
@@ -29,5 +28,5 @@ export const RegisterSchema = z.object({
     .string()
     // .min(10, '비밀번호는 최소 10자 이상이어야 합니다')
     .max(16, '비밀번호는 최대 16자까지 입력할 수 있습니다'),
-  name: z.string()
+  name: z.string(),
 })

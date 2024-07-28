@@ -47,6 +47,7 @@ export async function updateSession(request: NextRequest) {
   if (!session) return
 
   const parsed = await decrypt(session)
+
   // console.log('updateSession-parsed:', parsed)
   parsed.expires = new Date(Date.now() + 10000 * 1000)
   const res = NextResponse.next()
