@@ -13,14 +13,15 @@ import { Button } from '../ui/button'
 import HamburgerIcon from '/public/assets/ham.svg'
 
 const Header = (props: HeaderProps) => {
+
   const token = useSelector((state: RootState) => state.auth.token)
   const router = useRouter()
-
   const dispatch = useDispatch()
 
   const [isMenuVisible, setIsMenuVisible] = useState(false)
 
   const logout = () => {
+
     fetch('/api/logout', {
       method: 'POST',
       headers: {

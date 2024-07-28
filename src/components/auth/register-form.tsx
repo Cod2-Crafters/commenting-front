@@ -33,7 +33,6 @@ export const RegisterForm = () => {
         defaultValues: {
             id: "",
             email: "",
-            emailAuth: "",
             password: "",
             passwordConfirm: "",
             name: ""
@@ -45,6 +44,7 @@ export const RegisterForm = () => {
         setSuccess("");
 
         startTransition(() => {
+
             fetch(process.env.NEXT_PUBLIC_SERVER_URL + "/api/member/sign-up", {
                 method: "POST",
                 headers: {
@@ -81,8 +81,8 @@ export const RegisterForm = () => {
             setEmailError("유효한 이메일을 입력하세요.");
             return;
         }
-
         fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/member/check-email?email=${email}`, {
+
             method: "GET",
             headers: {
                 "Content-Type": "application/json"
@@ -240,34 +240,6 @@ export const RegisterForm = () => {
                                         </p>
                                     )}
 
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="emailAuth"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-white">
-                                        이메일 인증번호 입력
-                                    </FormLabel>
-                                    <div className="flex space-x-2">
-                                        <FormControl>
-                                            <Input
-                                                disabled={isPending}
-                                                {...field}
-                                                className="bg-surface h-[60px]"
-                                            />
-                                        </FormControl>
-                                        <Button
-                                            type="button"
-                                            className="bg-black text-white h-[60px] border border-white w-[200px]"
-                                            onClick={() => console.log('인증확인')}
-                                        >
-                                            인증확인
-                                        </Button>
-                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )}
