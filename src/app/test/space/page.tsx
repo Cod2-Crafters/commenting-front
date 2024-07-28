@@ -48,7 +48,7 @@ const page = (props: Props) => {
             <div className="py-10">
               {[1, 2].map((item, index) => {
                 return (
-                  <div>
+                  <div key={index}>
                     <div className="flex flex-row justify-between">
                       <div className="flex flex-row items-center space-x-2">
                         <Image
