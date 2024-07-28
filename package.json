@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && next lint --max-warnings=9999",
     "start": "next start",
     "lint": "eslint --fix . --ext .js,.jsx,.ts,.tsx",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md}\""
@@ -25,6 +25,7 @@
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "cors": "^2.8.5",
     "jose": "^5.3.0",
     "next": "14.2.1",
     "next-auth": "^5.0.0-beta.18",
@@ -40,6 +41,7 @@
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
     "@types/next-auth": "^3.15.0",
     "@types/node": "^20",
     "@types/react": "^18",

@@ -29,6 +29,7 @@ yarn-error.log*
 .env*.local
 .env
 
+package-lock.json
 
 # vercel
 .vercel
@@ -37,3 +38,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 src/app/test/**/*
+.src_작업 후/**/*
