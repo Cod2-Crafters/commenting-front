@@ -6,7 +6,7 @@ const axiosClient = axios.create()
 // 라이브러리에 대한 timeout 값 재정의
 // 이제 모든 요청은 시간 초과 전 2.5초 대기하는 인스턴스를 사용합니다.
 axiosClient.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL
-axiosClient.defaults.timeout = 2500
+axiosClient.defaults.timeout = 4000
 axiosClient.defaults.headers.common['Content-Type'] = 'application/json'
 
 axiosClient.interceptors.response.use(
