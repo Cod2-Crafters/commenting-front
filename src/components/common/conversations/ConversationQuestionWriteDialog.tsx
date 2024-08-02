@@ -1,4 +1,5 @@
 'use client'
+import { ConversationsItemState } from '@/app/space/conversationSlice'
 import axiosClient from '@/axios.config'
 import { FormError } from '@/components/form-error'
 import { SpaceContext } from '@/components/space/space-context'
@@ -8,24 +9,41 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
-import { APIResponseMsg, ConversationQuestionWriteSchema } from '@/schemas'
+import { getImageUrl } from '@/lib/utils'
+import { APIResponseMsg, ConversationQuestionWriteSchema, ConversationSchemaState } from '@/schemas'
 import { RootState } from '@/store'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { ReactNode, useContext, useState } from 'react'
+import { ReactNode, useContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
 import { z } from 'zod'
 
 interface AnswerWriteDialogProps {
+  questionMstId?: number
   label: string
   children?: ReactNode
 }
 
-const AnswerWriteDialog = ({ label }: AnswerWriteDialogProps) => {
+const AnswerWriteDialog = ({ questionMstId, label }: AnswerWriteDialogProps) => {
   let { ownerId, guestId } = useContext(SpaceContext)
   const [isOpen, setIsOpen] = useState(false)
+  const [questionConverstaions, setQuestionConverstaions] = useState<ConversationSchemaState[]>()
+
+  questionMstId = 10
+  if (questionMstId) {
+    useEffect(() => {
+      async function fetchQuestionConversations() {
+        const response = await axiosClient.get<APIResponseMsg<ConversationSchemaState[]>>(`/api/conversations/details/${questionMstId}`);
+        setQuestionConverstaions(response.data.data);
+      }
+      fetchQuestionConversations();      
+    }, [])
+  }
+
+
+
 
   const conversationQuestionWriteForm = useForm<z.infer<typeof ConversationQuestionWriteSchema>>({
     resolver: zodResolver(ConversationQuestionWriteSchema),
@@ -38,7 +56,9 @@ const AnswerWriteDialog = ({ label }: AnswerWriteDialogProps) => {
 
   const { content } = conversationQuestionWriteForm.watch()
   const router = useRouter()
-  const conversations = useSelector<RootState>((state) => state.conversations)
+  
+  // const conversations = useSelector<RootState>((state) => state.conversations)
+
 
   async function onSubmit(values: z.infer<typeof ConversationQuestionWriteSchema>) {
     alert('answer1' + JSON.stringify(values))
@@ -57,9 +77,9 @@ const AnswerWriteDialog = ({ label }: AnswerWriteDialogProps) => {
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={setIsOpen} >
         <DialogTrigger asChild>
-          <Button className="w-full" variant={'outline'} asChild={false}>
+          <Button className="w-full" variant={'outline'} asChild={false} onClick={() => conversationQuestionWriteForm.reset()}>
             {label}
             <span>{'guestid:' + guestId + ' / ownerid:' + ownerId}</span>
           </Button>
@@ -84,9 +104,9 @@ const AnswerWriteDialog = ({ label }: AnswerWriteDialogProps) => {
                 <ScrollArea className="p-4">
                   <div className="flex flex-col space-y-4 max-h-[420px]">
                     {/* items */}
-                    {[...Array(0)].map((_, index) => {
+                    {questionMstId != 0 && questionConverstaions?.map((questionConversation, index) => {
                       return (
-                        <div key={index}>
+                        <div key={index} >
                           <div className="flex flex-row items-center space-x-2">
                             {/* <span className="rounded-full">
                           <DefaultUserIcon width={50} height={50} />
@@ -94,7 +114,7 @@ const AnswerWriteDialog = ({ label }: AnswerWriteDialogProps) => {
                             {/* before:bg-gradient-to-bl before:from-indigo-500 before:w-[50px] before:content-['_'] before:h-[50px] before:absolute before:top-0 before:rounded-full before:z-10 */}
                             <div className="rounded-full relative">
                               <Avatar className="w-[50px] h-[50px]">
-                                <AvatarImage src="/assets/user.png" alt="profile" />
+                                <AvatarImage src={getImageUrl(questionConversation.avatarPath)} alt="profile" />
                                 <AvatarFallback>
                                   <div>
                                     <Image className="rounded-full bg-gradient-to-tl to-orange-200 from-stone-100 border-0 border-white p-1" src="/assets/no-user.png" alt="profile" width={50} height={50} />
@@ -102,14 +122,14 @@ const AnswerWriteDialog = ({ label }: AnswerWriteDialogProps) => {
                                 </AvatarFallback>
                               </Avatar>
                             </div>
-                            <b>사용자B</b>
+                            <b>익명이</b>
                           </div>
                           <div className="relative my-4 ">
                             {/* after */}
                             <p className="absolute h-full my-auto -translate-y-1/2 border-r-2 top-1/2 border-talkborder left-5">&nbsp;</p>
                             <p className="flex items-center py-2 text-base break-all mr-14 ml-14 text-wrap">
-                              Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                              {index == 2 ? ' Lorem ipsum dolor sit amet consectetur adipisicingelit._Lorem ipsum dolor sit amet consecteturadipisicing elit.' : ''}
+                              {questionConversation.content}
+                              {/* {index == 2 ? ' Lorem ipsum dolor sit amet consectetur adipisicingelit._Lorem ipsum dolor sit amet consecteturadipisicing elit.' : ''} */}
                             </p>
                           </div>
                         </div>
