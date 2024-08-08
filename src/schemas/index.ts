@@ -93,8 +93,27 @@ export const ConversationQuestionWriteSchema = z.object({
   content: z.string().min(2, { message: '2글자 이상 입력하세요' }),
   ownerId: z.number(),
   guestId: z.number(),
+  mstId: z.number().optional().default(0),
 })
 
 export type ConversationQuestionWriteSchemaState = z.infer<typeof ConversationQuestionWriteSchema>
 
 //======================================== conversations question write (create) end ========================================//
+
+
+export interface ConversationQuestionLikeItResponse {
+  success: boolean
+  action: string
+}
+
+//======================================== question heart (like question) ========================================//
+
+export const ConversationQuestionLikeItSchema = z.object({
+conId: z.number(),
+userId: z.number(),
+})
+
+
+export type ConversationQuestionLikeItSchemaState = z.infer<typeof ConversationQuestionLikeItSchema>
+
+//======================================== question heart (like question) end ========================================//

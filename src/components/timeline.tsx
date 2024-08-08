@@ -1,53 +1,59 @@
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 
-import { fetchConversations } from '@/app/space/conversationSlice'
+import { deleteQuestion, fetchConversations, toggleConversationLikeIt } from '@/app/space/conversationSlice'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { getImageUrl } from '@/lib/utils'
+import { getImageUrl, getTimeDiffText } from '@/lib/utils'
 import { AppDispatch, RootState } from '@/store'
 import React, { useContext, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { SpaceContext } from './space/space-context'
 import CommentIcon from '/public/assets/comment.svg'
 import HeartIcon from '/public/assets/heart.svg'
+import HeartFillIcon from '/public/assets/heart-fill.svg'
+
 import MoreIcon from '/public/assets/more.svg'
 import ShareIcon from '/public/assets/share.svg'
+import { Dayjs } from 'dayjs'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from '@radix-ui/react-dropdown-menu'
+import axiosClient from '@/axios.config'
+import { APIResponseMsg, ConversationQuestionLikeItResponse, ConversationQuestionLikeItSchemaState, ConversationSchema, ConversationSchemaState } from '@/schemas'
 
-type TimelineProps = {}
+interface TimelineProps {
+  conversations: ConversationSchemaState[]
+}
 
-const Timeline = ({ ...props }: TimelineProps) => {
-  //   const [converSations, setConverSations] =
-  //     useState<ConversationSchemaState[]>()
-
+const Timeline = ({ conversations, ...props }: TimelineProps) => {
   const dispatch: AppDispatch = useDispatch()
-  const conversations = useSelector((state: RootState) => state.conversations.entities)
-  const status = useSelector((state: RootState) => state.conversations.loading)
 
-  const { ownerId, guestId } = useContext(SpaceContext)
+  const { spaceOwnerId, showerGuestId, conversationsMaxMasterId } = useContext(SpaceContext)
 
-  //   const loadConversation = async () => {
-  //     const response = await axiosClient.get<
-  //       APIResponseMsg<ConversationSchemaState[]>
-  //     >(
-  //       `${process.env.NEXT_PUBLIC_SERVER_URL}/api/conversations/timeline/${ownerId} `,
-  //     )
-
-  //     return response.data
-  //   }
-  useEffect(() => {
-    if (status === 'idle') {
-      dispatch(fetchConversations(ownerId))
-      alert('fetchConversations ')
+  // 좋아요 call api
+  const callToggleConversationLikeIt = async (conId: number, showerGuestId: number) => {
+    const bodyData: ConversationQuestionLikeItSchemaState = {
+      conId: conId,
+      userId: showerGuestId
     }
-    // loadConversation().then((conversations) => {
-    //   dispatch(setConversations(conversations.data))
-    //   //setConverSations(conversations.data)
-    // })
-  }, [dispatch, status])
+
+    const response = await axiosClient.post<APIResponseMsg<ConversationQuestionLikeItResponse>>(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/recommend/likes`, bodyData);
+    return response.data
+
+  }
+
+  // const deleteQuestion = async (conId) => {
+  //   const response = await axiosClient.delete<APIResponseMsg<number>>(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/conversations/question/${conId}`)
+  //   return response.data;
+  // }
+
+  const receiveConversationsStatus = useSelector((state: RootState) => state.conversations.loading)
 
   return (
     <div>
-      {status == 'successed' && conversations?.length == 0 && <h2>작성된 질문이 없습니다.</h2>}
+      <p>
+        스페이스 주인: {spaceOwnerId} / 로그인한 조회자: {showerGuestId} / maxMstId: {conversationsMaxMasterId}
+      </p>
+
+      {receiveConversationsStatus == 'successed' && conversations?.length == 0 && <h2>작성된 질문이 없습니다.</h2>}
       {conversations?.map((conversation, index) => {
         return (
           <React.Fragment key={index}>
@@ -63,15 +69,35 @@ const Timeline = ({ ...props }: TimelineProps) => {
                     </div>
                   </AvatarFallback>
                 </Avatar>
-                <b className="text-base font-semibold">익명이 </b>
-                <span className="text-sm font-medium text-muted">30일전</span>
+                <b className="text-base font-semibold">익명이 {`(${conversation.mstId}, ${conversation.conId}) owner:${conversation.ownerId} gu: ${conversation.guestId}`} </b>
+                <span className="text-sm font-medium text-muted">{getTimeDiffText(conversation.modifiedAt)}</span>
               </div>
 
-              <div className="relative">
-                <Button variant={'outline'} size={'icon'} className="border-0">
+                <div className="relative">
+              {showerGuestId === conversation.ownerId && 
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Button variant={'outline'} size={'icon'} className="border-0">
+                      <MoreIcon width={24} height={24} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem>
+                    <Button variant={'outline'} size={'lg'} className="border-0" onClick={() => {
+                      dispatch(deleteQuestion(conversation.conId))
+                    }}>
+                      삭제
+                    </Button>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+}
+
+                {/* <Button variant={'outline'} size={'icon'} className="border-0">
                   <MoreIcon width={24} height={24} />
-                </Button>
+                </Button> */}
               </div>
+            
             </div>
             <div className="relative ">
               {/* after */}
@@ -92,23 +118,45 @@ const Timeline = ({ ...props }: TimelineProps) => {
                   <div className="flex flex-col">
                     <p className="pt-2 pr-2 text-base break-all text-wrap">{conversation.content}</p>
                     <div className="flex flex-row items-center -ml-3 space-x-4 text-sm ">
-                      <Button className="flex justify-start text-white" variant={'link'} size={'sm'}>
-                        <HeartIcon width={16} height={16} />
-                        <label className="">5</label>
+                      <Button className="flex justify-start text-red " variant={'link'} size={'sm'} onClick={async() => {
+
+
+                        const responseData = await callToggleConversationLikeIt(conversation.conId, showerGuestId);
+                        if (responseData.data.success === true) {
+                          alert(JSON.stringify(responseData))
+                          dispatch(toggleConversationLikeIt({conId:conversation.conId, userId: showerGuestId }))
+                        }
+                        // if (responseData.data.action == 'insert') {
+                        //     // 좋아요 추가 완료
+
+                        // }
+                        // else
+                        // {
+                        //     // 좋아요 삭제
+                        // }
+                      }}>
+                        {showerGuestId != 0 && conversation.isGood === true ? <HeartFillIcon width={16} height={16} /> : <HeartIcon width={16} height={16} />}
                       </Button>
-                      <Button className="text-white rounded-full" variant={'link'}>
-                        {' '}
-                        <CommentIcon width={16} height={16} />
-                      </Button>
-                      <Button className="text-white rounded-full " variant={'link'}>
-                        <ShareIcon width={16} height={16} />
-                      </Button>
+
+                      {/* 질문인 경우에만 댓글 작성 아이콘 및 공유 아이콘 표시 */}
+                      {conversation.isQuestion == true && (
+                        <>
+                          <Button className="text-white rounded-full" variant={'link'}>
+                            <CommentIcon width={16} height={16} />
+                          </Button>
+
+                          <Button className="text-white rounded-full " variant={'link'}>
+                            <ShareIcon width={16} height={16} />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </React.Fragment>
+          
         )
       })}
     </div>

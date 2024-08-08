@@ -47,7 +47,7 @@ const MyProfileInfoDialog = ({
   label,
   profileData,
 }: MyProfileInfoDialogProps) => {
-  const { ownerId } = useContext(SpaceContext)
+  const { spaceOwnerId: ownerId } = useContext(SpaceContext)
 
   // const [newAvatarPath, setNewAvatarPath] = useState(profileData.avatarPath)
   console.log('profileData', profileData)

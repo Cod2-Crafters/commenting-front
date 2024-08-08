@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
+import { useSpaceContext } from '@/hooks/useSpaceContext'
 import { getImageUrl } from '@/lib/utils'
 import { APIResponseMsg, ConversationQuestionWriteSchema, ConversationSchemaState } from '@/schemas'
 import { RootState } from '@/store'
@@ -27,61 +28,56 @@ interface AnswerWriteDialogProps {
 }
 
 const AnswerWriteDialog = ({ questionMstId, label }: AnswerWriteDialogProps) => {
-  let { ownerId, guestId } = useContext(SpaceContext)
   const [isOpen, setIsOpen] = useState(false)
-  const [questionConverstaions, setQuestionConverstaions] = useState<ConversationSchemaState[]>()
+  const [questionConversation, setQuestionConverstaion] = useState<ConversationSchemaState>()
+  const { spaceOwnerId, showerGuestId, conversationsMaxMasterId } = useSpaceContext()
 
-  questionMstId = 10
   if (questionMstId) {
     useEffect(() => {
+      // 질문 작성 다이얼로그에서 질문 표시하는 api 호출
       async function fetchQuestionConversations() {
-        const response = await axiosClient.get<APIResponseMsg<ConversationSchemaState[]>>(`/api/conversations/details/${questionMstId}`);
-        setQuestionConverstaions(response.data.data);
+        const response = await axiosClient.get<APIResponseMsg<ConversationSchemaState[]>>(`/api/conversations/details/${questionMstId}`)
+        setQuestionConverstaion(response.data.data.find((question) => question.isQuestion == true))
       }
-      fetchQuestionConversations();      
+      fetchQuestionConversations()
     }, [])
   }
-
-
-
 
   const conversationQuestionWriteForm = useForm<z.infer<typeof ConversationQuestionWriteSchema>>({
     resolver: zodResolver(ConversationQuestionWriteSchema),
     defaultValues: {
-      guestId: Number(guestId),
-      ownerId: Number(ownerId),
+      guestId: Number(showerGuestId),
+      ownerId: Number(spaceOwnerId),
       content: '',
+      mstId: Number(conversationsMaxMasterId)
     },
   })
 
+
   const { content } = conversationQuestionWriteForm.watch()
   const router = useRouter()
-  
-  // const conversations = useSelector<RootState>((state) => state.conversations)
-
-
   async function onSubmit(values: z.infer<typeof ConversationQuestionWriteSchema>) {
-    alert('answer1' + JSON.stringify(values))
-    const response = await axiosClient.post<APIResponseMsg<number | string>>(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/conversations/question`, values)
+    values.mstId = conversationsMaxMasterId
+    alert('answer write success' + JSON.stringify(values) + '@' + conversationsMaxMasterId)  
+
+    const response = await axiosClient.post<APIResponseMsg<number | string>>(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/conversations/question`, {...values, mstId: conversationsMaxMasterId})
 
     if (response.data.status === 'SUCCESS') {
-      alert('api success!')
+      alert('api success!' + conversationsMaxMasterId)
     }
 
     conversationQuestionWriteForm.reset()
     setIsOpen(false)
   }
 
-  // console.log(conversationQuestionWriteForm.formState.errors)
-  // dispatch<ConversationAction>(setConversations())
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={setIsOpen} >
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           <Button className="w-full" variant={'outline'} asChild={false} onClick={() => conversationQuestionWriteForm.reset()}>
             {label}
-            <span>{'guestid:' + guestId + ' / ownerid:' + ownerId}</span>
+            <span>{'guestid:' + showerGuestId + ' / ownerid:' + spaceOwnerId + ' / maxMstid:' + conversationsMaxMasterId}</span>
           </Button>
         </DialogTrigger>
         <DialogContent className="w-[600px] min-h-[100px] p-4">
@@ -104,37 +100,35 @@ const AnswerWriteDialog = ({ questionMstId, label }: AnswerWriteDialogProps) => 
                 <ScrollArea className="p-4">
                   <div className="flex flex-col space-y-4 max-h-[420px]">
                     {/* items */}
-                    {questionMstId != 0 && questionConverstaions?.map((questionConversation, index) => {
-                      return (
-                        <div key={index} >
-                          <div className="flex flex-row items-center space-x-2">
-                            {/* <span className="rounded-full">
-                          <DefaultUserIcon width={50} height={50} />
-                        </span> */}
-                            {/* before:bg-gradient-to-bl before:from-indigo-500 before:w-[50px] before:content-['_'] before:h-[50px] before:absolute before:top-0 before:rounded-full before:z-10 */}
-                            <div className="rounded-full relative">
-                              <Avatar className="w-[50px] h-[50px]">
-                                <AvatarImage src={getImageUrl(questionConversation.avatarPath)} alt="profile" />
-                                <AvatarFallback>
-                                  <div>
-                                    <Image className="rounded-full bg-gradient-to-tl to-orange-200 from-stone-100 border-0 border-white p-1" src="/assets/no-user.png" alt="profile" width={50} height={50} />
-                                  </div>
-                                </AvatarFallback>
-                              </Avatar>
-                            </div>
-                            <b>익명이</b>
+                    {questionMstId != 0 && questionConversation && (
+                      <div>
+                        <div className="flex flex-row items-center space-x-2">
+                          {/* <span className="rounded-full">
+                              <DefaultUserIcon width={50} height={50} />
+                            </span> */}
+                          {/* before:bg-gradient-to-bl before:from-indigo-500 before:w-[50px] before:content-['_'] before:h-[50px] before:absolute before:top-0 before:rounded-full before:z-10 */}
+                          <div className="rounded-full relative">
+                            <Avatar className="w-[50px] h-[50px]">
+                              <AvatarImage src={getImageUrl(questionConversation.avatarPath)} alt="profile" />
+                              <AvatarFallback>
+                                <div>
+                                  <Image className="rounded-full bg-gradient-to-tl to-orange-200 from-stone-100 border-0 border-white p-1" src="/assets/no-user.png" alt="profile" width={50} height={50} />
+                                </div>
+                              </AvatarFallback>
+                            </Avatar>
                           </div>
-                          <div className="relative my-4 ">
-                            {/* after */}
-                            <p className="absolute h-full my-auto -translate-y-1/2 border-r-2 top-1/2 border-talkborder left-5">&nbsp;</p>
-                            <p className="flex items-center py-2 text-base break-all mr-14 ml-14 text-wrap">
-                              {questionConversation.content}
-                              {/* {index == 2 ? ' Lorem ipsum dolor sit amet consectetur adipisicingelit._Lorem ipsum dolor sit amet consecteturadipisicing elit.' : ''} */}
-                            </p>
-                          </div>
+                          <b>익명이</b>
                         </div>
-                      )
-                    })}
+                        <div className="relative my-4 ">
+                          {/* after */}
+                          <p className="absolute h-full my-auto -translate-y-1/2 border-r-2 top-1/2 border-talkborder left-5">&nbsp;</p>
+                          <p className="flex items-center py-2 text-base break-all mr-14 ml-14 text-wrap">
+                            {questionConversation.content}
+                            {/* {index == 2 ? ' Lorem ipsum dolor sit amet consectetur adipisicingelit._Lorem ipsum dolor sit amet consecteturadipisicing elit.' : ''} */}
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     <div>
                       <div className="flex flex-row items-center space-x-2">

@@ -1,10 +1,12 @@
-import { createContext } from 'react'
+import { createContext } from "react"
 
 interface SpaceUserInfoState {
-  guestId: number
-  ownerId: number
+  showerGuestId: number
+  spaceOwnerId: number
+  conversationsMaxMasterId: number
 }
 export const SpaceContext = createContext<SpaceUserInfoState>({
-  guestId: 0,
-  ownerId: 0,
+  showerGuestId: 0,
+  spaceOwnerId: 0,
+  conversationsMaxMasterId: 0
 })

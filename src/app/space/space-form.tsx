@@ -8,6 +8,10 @@ import { SpaceContext } from '@/components/space/space-context'
 import Timeline from '@/components/timeline'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProfileSchemaState } from '@/schemas'
+import { AppDispatch, RootState } from '@/store'
+import { useDispatch, useSelector } from 'react-redux'
+import { useEffect, useState } from 'react'
+import { fetchConversations } from './conversationSlice'
 
 interface SpacePageProps {
   ownerId: number
@@ -16,12 +20,39 @@ interface SpacePageProps {
 }
 
 const SpaceForm = ({ ownerId, guestId, profileData }: SpacePageProps) => {
+
+  const status = useSelector((state: RootState) => state.conversations.loading)
+  const dispatch: AppDispatch = useDispatch()
+
+
+  const [maxMasterId, setMaxMasterId] = useState(0)
+  const conversations = useSelector((state: RootState) => state.conversations.entities)
+  
+
+  useEffect(() => {
+    if (status === 'idle') {
+      // conversations 가져오기
+      dispatch(fetchConversations(ownerId))
+      alert('fetchConversations-spaceform ')
+    }
+    if (status == 'successed') {
+      setMaxMasterId(conversations?.length && conversations[0].mstId || 0)
+    }
+    
+  }, [dispatch, status])
+
+  useEffect(() => {
+    alert('maxMasterId:' + maxMasterId);
+  }, [maxMasterId])
+
+
   return (
     <>
       <SpaceContext.Provider
         value={{
-          ownerId,
-          guestId,
+          spaceOwnerId: ownerId,
+          showerGuestId: guestId,
+          conversationsMaxMasterId: maxMasterId
         }}
       >
         <div className="flex flex-row justify-center min-h-screen bg-background">
@@ -74,7 +105,7 @@ const SpaceForm = ({ ownerId, guestId, profileData }: SpacePageProps) => {
               </TabsList>
               <TabsContent value="receive">
                 <div className="py-10">
-                  <Timeline />
+                  <Timeline conversations={conversations} />
 
                   {/* 
               {[].length == 0 && <h2>작성된 질문이 없습니다.</h2>}
