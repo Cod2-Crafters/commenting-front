@@ -101,6 +101,19 @@ export type ConversationQuestionWriteSchemaState = z.infer<typeof ConversationQu
 //======================================== conversations question write (create) end ========================================//
 
 
+//======================================== conversations answer write (create) ========================================//
+export const ConversationAnswerWriteSchema = z.object({
+  content: z.string().min(2, { message: '2글자 이상 입력하세요' }),
+  ownerId: z.number(),
+  guestId: z.number(),
+  maxMstId: z.number().optional().default(0),
+})
+
+export type ConversationAnswerWriteSchemaState = z.infer<typeof ConversationQuestionWriteSchema>
+
+//======================================== conversations answer write (create) end ========================================//
+
+
 export interface ConversationQuestionLikeItResponse {
   success: boolean
   action: string

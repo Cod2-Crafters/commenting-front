@@ -18,6 +18,8 @@ export function getImageUrl(fileName?: string) {
   // let fileName = fullUrl.substring(slahIndex)
 
   // return process.env.NEXT_PUBLIC_SERVER_URL + `/api/profile/file/${fileName}`
+
+  if (!fileName) return null;
   return process.env.NEXT_PUBLIC_SERVER_URL + `/api/profile/file/${fileName}`
 }
 

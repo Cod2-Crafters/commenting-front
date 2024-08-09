@@ -1,25 +1,27 @@
 'use client'
-import { ConversationsItemState } from '@/app/space/conversationSlice'
+import { ConversationsItemState, createAnswer, createQuestion } from '@/app/space/conversationSlice'
 import axiosClient from '@/axios.config'
 import { FormError } from '@/components/form-error'
 import { SpaceContext } from '@/components/space/space-context'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
 import { useSpaceContext } from '@/hooks/useSpaceContext'
 import { getImageUrl } from '@/lib/utils'
 import { APIResponseMsg, ConversationQuestionWriteSchema, ConversationSchemaState } from '@/schemas'
-import { RootState } from '@/store'
+import { AppDispatch, RootState } from '@/store'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { ReactNode, useContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { z } from 'zod'
+import CommentIcon from '/public/assets/comment.svg'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 
 interface AnswerWriteDialogProps {
   questionMstId?: number
@@ -31,6 +33,7 @@ const AnswerWriteDialog = ({ questionMstId, label }: AnswerWriteDialogProps) => 
   const [isOpen, setIsOpen] = useState(false)
   const [questionConversation, setQuestionConverstaion] = useState<ConversationSchemaState>()
   const { spaceOwnerId, showerGuestId, conversationsMaxMasterId } = useSpaceContext()
+  const dispatch: AppDispatch = useDispatch()
 
   if (questionMstId) {
     useEffect(() => {
@@ -40,7 +43,7 @@ const AnswerWriteDialog = ({ questionMstId, label }: AnswerWriteDialogProps) => 
         setQuestionConverstaion(response.data.data.find((question) => question.isQuestion == true))
       }
       fetchQuestionConversations()
-    }, [])
+    }, [questionMstId])
   }
 
   const conversationQuestionWriteForm = useForm<z.infer<typeof ConversationQuestionWriteSchema>>({
@@ -49,38 +52,54 @@ const AnswerWriteDialog = ({ questionMstId, label }: AnswerWriteDialogProps) => 
       guestId: Number(showerGuestId),
       ownerId: Number(spaceOwnerId),
       content: '',
-      mstId: Number(conversationsMaxMasterId)
+      mstId: Number(conversationsMaxMasterId),
     },
   })
 
-
   const { content } = conversationQuestionWriteForm.watch()
   const router = useRouter()
+
   async function onSubmit(values: z.infer<typeof ConversationQuestionWriteSchema>) {
-    values.mstId = conversationsMaxMasterId
-    alert('answer write success' + JSON.stringify(values) + '@' + conversationsMaxMasterId)  
-
-    const response = await axiosClient.post<APIResponseMsg<number | string>>(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/conversations/question`, {...values, mstId: conversationsMaxMasterId})
-
-    if (response.data.status === 'SUCCESS') {
-      alert('api success!' + conversationsMaxMasterId)
+    // 작성 완료
+   
+    alert('answer write success' + JSON.stringify(values) + '@' + conversationsMaxMasterId)
+    if (questionMstId === 0) {
+      // 질문 작성
+      values.mstId = conversationsMaxMasterId
+      dispatch(createQuestion(values))
+    } else {
+      // 답변 작성
+      alert('답변작성');
+      values.mstId = questionMstId
+      dispatch(createAnswer(values))
     }
+
+    // const response = await axiosClient.post<APIResponseMsg<number | string>>(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/conversations/question`, {...values, mstId: conversationsMaxMasterId})
+
+    // if (response.data.status === 'SUCCESS') {
+    //   alert('api success!' + conversationsMaxMasterId)
+    // }
 
     conversationQuestionWriteForm.reset()
     setIsOpen(false)
   }
 
-
   return (
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button className="w-full" variant={'outline'} asChild={false} onClick={() => conversationQuestionWriteForm.reset()}>
-            {label}
-            <span>{'guestid:' + showerGuestId + ' / ownerid:' + spaceOwnerId + ' / maxMstid:' + conversationsMaxMasterId}</span>
-          </Button>
+          {label ? (
+            <Button className="w-full" variant={'outline'} asChild={false} onClick={() => conversationQuestionWriteForm.reset()}>
+              {label}
+            </Button>
+          ) : (
+            <Button className="text-white rounded-full" variant={'link'}>
+              <CommentIcon width={16} height={16} />
+            </Button>
+          )}
         </DialogTrigger>
-        <DialogContent className="w-[600px] min-h-[100px] p-4">
+
+        <DialogContent className="w-[600px] min-h-[100px] p-4" aria-describedby={undefined}>
           <Form {...conversationQuestionWriteForm}>
             <form onSubmit={conversationQuestionWriteForm.handleSubmit(onSubmit)}>
               {}
@@ -91,11 +110,13 @@ const AnswerWriteDialog = ({ questionMstId, label }: AnswerWriteDialogProps) => 
               </div>
               <div className="text-white ">
                 <DialogHeader className="text-white">
-                  {/* <DialogTitle>1111</DialogTitle>
-              <DialogDescription>
-                This action cannot be undone. This will permanently delete your
-                account and remove your data from our servers.
-              </DialogDescription> */}
+                  <VisuallyHidden asChild>
+                    <DialogTitle>질문 및 댓글 작성</DialogTitle>
+                    {/* <DialogDescription>
+          This action cannot be undone. This will permanently delete your
+          account and remove your data from our servers.
+        </DialogDescription> */}
+                  </VisuallyHidden>
                 </DialogHeader>
                 <ScrollArea className="p-4">
                   <div className="flex flex-col space-y-4 max-h-[420px]">

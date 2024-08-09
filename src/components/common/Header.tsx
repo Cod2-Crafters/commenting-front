@@ -33,7 +33,7 @@ const Header = (props: HeaderProps) => {
     router.push('/auth/login');
   }
   return (
-    <header className="fixed top-0 left-0 w-full bg-background">
+    <header className="top-0 left-0 w-full bg-background">
       <div className="flex max-w-[1230px] m-auto py-8 justify-between items-center px-2">
         <Link href={'/'}>
           <h2 className="text-primary font-light text-2xl">

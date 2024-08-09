@@ -81,9 +81,9 @@ const SpaceForm = ({ ownerId, guestId, profileData }: SpacePageProps) => {
             <p className="text-base font-semibold">{profileData?.introduce}</p>
             <div className="inline-flex space-x-4 text-xl font-semibold ">
               <label>답변</label>
-              <span>2개</span>
+              <span>N개</span>
               <label>고마워요!</label>
-              <span>2개</span>
+              <span>N개</span>
             </div>
             {/* 궁금해요 <> 프로필 편집 */}
 

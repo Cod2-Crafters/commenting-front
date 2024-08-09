@@ -18,6 +18,7 @@ import { Dayjs } from 'dayjs'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from '@radix-ui/react-dropdown-menu'
 import axiosClient from '@/axios.config'
 import { APIResponseMsg, ConversationQuestionLikeItResponse, ConversationQuestionLikeItSchemaState, ConversationSchema, ConversationSchemaState } from '@/schemas'
+import AnswerWriteButton from './space/ConversationQuestionWriteButton'
 
 interface TimelineProps {
   conversations: ConversationSchemaState[]
@@ -75,16 +76,16 @@ const Timeline = ({ conversations, ...props }: TimelineProps) => {
 
                 <div className="relative">
               {showerGuestId === conversation.ownerId && 
-                <DropdownMenu>
+                <DropdownMenu >
                   <DropdownMenuTrigger>
-                    <Button variant={'outline'} size={'icon'} className="border-0">
+                    <Button variant={'outline'} size={'icon'}>
                       <MoreIcon width={24} height={24} />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent>
+                  <DropdownMenuContent className='overflow-hidden'>
                     <DropdownMenuItem>
-                    <Button variant={'outline'} size={'lg'} className="border-0" onClick={() => {
-                      dispatch(deleteQuestion(conversation.conId))
+                    <Button variant={'outline'} size={'lg'} onClick={() => {
+                      dispatch(deleteQuestion(conversation.mstId))
                     }}>
                       삭제
                     </Button>
@@ -120,20 +121,11 @@ const Timeline = ({ conversations, ...props }: TimelineProps) => {
                     <div className="flex flex-row items-center -ml-3 space-x-4 text-sm ">
                       <Button className="flex justify-start text-red " variant={'link'} size={'sm'} onClick={async() => {
 
-
                         const responseData = await callToggleConversationLikeIt(conversation.conId, showerGuestId);
                         if (responseData.data.success === true) {
                           alert(JSON.stringify(responseData))
                           dispatch(toggleConversationLikeIt({conId:conversation.conId, userId: showerGuestId }))
                         }
-                        // if (responseData.data.action == 'insert') {
-                        //     // 좋아요 추가 완료
-
-                        // }
-                        // else
-                        // {
-                        //     // 좋아요 삭제
-                        // }
                       }}>
                         {showerGuestId != 0 && conversation.isGood === true ? <HeartFillIcon width={16} height={16} /> : <HeartIcon width={16} height={16} />}
                       </Button>
@@ -141,10 +133,7 @@ const Timeline = ({ conversations, ...props }: TimelineProps) => {
                       {/* 질문인 경우에만 댓글 작성 아이콘 및 공유 아이콘 표시 */}
                       {conversation.isQuestion == true && (
                         <>
-                          <Button className="text-white rounded-full" variant={'link'}>
-                            <CommentIcon width={16} height={16} />
-                          </Button>
-
+                        <AnswerWriteButton label='' questionMstId={conversation.mstId}/>
                           <Button className="text-white rounded-full " variant={'link'}>
                             <ShareIcon width={16} height={16} />
                           </Button>
