@@ -1,13 +1,21 @@
 import axios from 'axios'
+import https from 'https'
+import fs from 'node:fs'
 import { convertRecursiveNullToEmptyString } from './lib/utils'
 
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false,
+})
 const axiosServer = axios.create()
+
+
 
 // 라이브러리에 대한 timeout 값 재정의
 // 이제 모든 요청은 시간 초과 전 2.5초 대기하는 인스턴스를 사용합니다.
 axiosServer.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL
 axiosServer.defaults.timeout = 4000
 axiosServer.defaults.headers.common['Content-Type'] = 'application/json'
+axiosServer.defaults.httpsAgent = httpsAgent
 
 axiosServer.interceptors.response.use(
   (response) => {
