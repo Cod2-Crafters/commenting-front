@@ -39,3 +39,4 @@ package-lock.json
 next-env.d.ts
 src/app/test/**/*
 .src_작업 후/**/*
+commenting-front*.*
