@@ -39,13 +39,15 @@ export const ProfileSchema = z.object({
   nickname: z
     .string({
       message: '닉네임을 입력하세요!',
-    })
+    })  
     .min(1, { message: '닉네임을 입력하세요!' }),
   introduce: z.string().optional().nullish(),
   link1: z.string().optional().nullish(),
   link2: z.string().optional().nullish(),
   link3: z.string().optional().nullish(),
-  avatarPath: z.string().optional(),
+  avatarPath: z.string().optional().nullish(),
+  answerCnt: z.number().optional(),
+  likesCnt: z.number().optional(),
 })
 
 //======================================== profile ========================================//
@@ -84,6 +86,10 @@ export const ConversationSchema = z.object({
 })
 
 export type ConversationSchemaState = z.infer<typeof ConversationSchema>
+export interface PagerConversationsState {
+  conversations: ConversationSchemaState[]
+  lastPage: boolean
+}
 
 //======================================== timeline, conversations end ========================================//
 
@@ -92,8 +98,41 @@ export const ConversationQuestionWriteSchema = z.object({
   content: z.string().min(2, { message: '2글자 이상 입력하세요' }),
   ownerId: z.number(),
   guestId: z.number(),
+  mstId: z.number().optional().default(0),
 })
 
 export type ConversationQuestionWriteSchemaState = z.infer<typeof ConversationQuestionWriteSchema>
 
 //======================================== conversations question write (create) end ========================================//
+
+
+//======================================== conversations answer write (create) ========================================//
+export const ConversationAnswerWriteSchema = z.object({
+  content: z.string().min(2, { message: '2글자 이상 입력하세요' }),
+  ownerId: z.number(),
+  guestId: z.number(),
+  maxMstId: z.number().optional().default(0),
+})
+
+export type ConversationAnswerWriteSchemaState = z.infer<typeof ConversationQuestionWriteSchema>
+
+//======================================== conversations answer write (create) end ========================================//
+
+
+export interface ConversationQuestionLikeItResponse {
+  success: boolean
+  action: string
+  conId?: number
+}
+
+//======================================== question heart (like question) ========================================//
+
+export const ConversationQuestionLikeItSchema = z.object({
+conId: z.number(),
+userId: z.number(),
+})
+
+
+export type ConversationQuestionLikeItSchemaState = z.infer<typeof ConversationQuestionLikeItSchema>
+
+//======================================== question heart (like question) end ========================================//

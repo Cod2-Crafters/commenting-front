@@ -7,7 +7,7 @@ interface MyProfileModifyButtonProps {
 }
 
 const MyProfileModifyButton = ({ label, data }: MyProfileModifyButtonProps) => {
-  return <MyProfileInfoDialog label={label} profileData={data} />
+  return <MyProfileInfoDialog label={label} loadProfileData={data} />
 }
 
 export default MyProfileModifyButton

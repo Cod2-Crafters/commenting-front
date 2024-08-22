@@ -38,11 +38,12 @@ body,
     --talkborder: #D9D9D9;
 
 
+
     --muted: #9E9E9E;
     --muted-foreground: #9E9E9E;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: #f1f5f9;
+    --accent-foreground: #0f172a;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;

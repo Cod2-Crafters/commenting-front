@@ -3,12 +3,12 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Image from 'next/image'
 
-import MyProfileModifyButton from '@/components/space/MyProfileModifyButton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import CommentIcon from '/public/assets/comment.svg'
 import HeartIcon from '/public/assets/heart.svg'
 import MoreIcon from '/public/assets/more.svg'
 import ShareIcon from '/public/assets/share.svg'
+import MyProfileModifyButton from '@/components/space/MyProfileModifyButton'
 
 type Props = {}
 
@@ -52,10 +52,10 @@ const page = (props: Props) => {
         <div className="inline-flex space-x-4 text-xl font-semibold ">
           <label>답변</label>
           <span>2개</span>
-          <label>고마워요!</label>
+          {/* <label>고마워요!</label> */}
           <span>2개</span>
         </div>
-        <MyProfileModifyButton label="프로필 편집" />
+        {/* <MyProfileModifyButton label="프로필 편집" data={profile} /> */}
         <Tabs defaultValue="receive" className="mt-8">
           <TabsList className="w-full">
             <TabsTrigger value="receive" className="w-full">
