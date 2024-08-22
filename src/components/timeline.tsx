@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 
-import { deleteQuestion, fetchConversations, toggleConversationLikeIt } from '@/app/space/conversationSlice'
+import { deleteQuestion, fetchConversations, toggleQuestionLikeIt } from '@/app/space/conversationSlice'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getImageUrl, getTimeDiffText } from '@/lib/utils'
 import { AppDispatch, RootState } from '@/store'
@@ -30,16 +30,16 @@ const Timeline = ({ conversations, ...props }: TimelineProps) => {
   const { spaceOwnerId, showerGuestId, conversationsMaxMasterId } = useContext(SpaceContext)
 
   // 좋아요 call api
-  const callToggleConversationLikeIt = async (conId: number, showerGuestId: number) => {
-    const bodyData: ConversationQuestionLikeItSchemaState = {
-      conId: conId,
-      userId: showerGuestId
-    }
+  // const callToggleConversationLikeIt = async (conId: number, showerGuestId: number) => {
+  //   const bodyData: ConversationQuestionLikeItSchemaState = {
+  //     conId: conId,
+  //     userId: showerGuestId
+  //   }
 
-    const response = await axiosClient.post<APIResponseMsg<ConversationQuestionLikeItResponse>>(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/recommend/likes`, bodyData);
-    return response.data
+  //   const response = await axiosClient.post<APIResponseMsg<ConversationQuestionLikeItResponse>>(`/api/recommend/likes`, bodyData);
+  //   return response.data
 
-  }
+  // }
 
   // const deleteQuestion = async (conId) => {
   //   const response = await axiosClient.delete<APIResponseMsg<number>>(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/conversations/question/${conId}`)
@@ -120,12 +120,7 @@ const Timeline = ({ conversations, ...props }: TimelineProps) => {
                     <p className="pt-2 pr-2 text-base break-all text-wrap">{conversation.content}</p>
                     <div className="flex flex-row items-center -ml-3 space-x-4 text-sm ">
                       <Button className="flex justify-start text-red " variant={'link'} size={'sm'} onClick={async() => {
-
-                        const responseData = await callToggleConversationLikeIt(conversation.conId, showerGuestId);
-                        if (responseData.data.success === true) {
-                          alert(JSON.stringify(responseData))
-                          dispatch(toggleConversationLikeIt({conId:conversation.conId, userId: showerGuestId }))
-                        }
+                          dispatch(toggleQuestionLikeIt({conId:conversation.conId, userId: showerGuestId }))
                       }}>
                         {showerGuestId != 0 && conversation.isGood === true ? <HeartFillIcon width={16} height={16} /> : <HeartIcon width={16} height={16} />}
                       </Button>

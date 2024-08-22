@@ -40,13 +40,15 @@ export const ProfileSchema = z.object({
   nickname: z
     .string({
       message: '닉네임을 입력하세요!',
-    })
+    })  
     .min(1, { message: '닉네임을 입력하세요!' }),
   introduce: z.string().optional().nullish(),
   link1: z.string().optional().nullish(),
   link2: z.string().optional().nullish(),
   link3: z.string().optional().nullish(),
-  avatarPath: z.string().optional(),
+  avatarPath: z.string().optional().nullish(),
+  answerCnt: z.number().optional(),
+  likesCnt: z.number().optional(),
 })
 
 //======================================== profile ========================================//
@@ -85,6 +87,10 @@ export const ConversationSchema = z.object({
 })
 
 export type ConversationSchemaState = z.infer<typeof ConversationSchema>
+export interface PagerConversationsState {
+  conversations: ConversationSchemaState[]
+  lastPage: boolean
+}
 
 //======================================== timeline, conversations end ========================================//
 
@@ -117,6 +123,7 @@ export type ConversationAnswerWriteSchemaState = z.infer<typeof ConversationQues
 export interface ConversationQuestionLikeItResponse {
   success: boolean
   action: string
+  conId?: number
 }
 
 //======================================== question heart (like question) ========================================//

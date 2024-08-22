@@ -35,16 +35,16 @@ const AnswerWriteDialog = ({ questionMstId, label }: AnswerWriteDialogProps) => 
   const { spaceOwnerId, showerGuestId, conversationsMaxMasterId } = useSpaceContext()
   const dispatch: AppDispatch = useDispatch()
 
-  if (questionMstId) {
-    useEffect(() => {
-      // 질문 작성 다이얼로그에서 질문 표시하는 api 호출
+  // 질문 작성 다이얼로그에서 질문 표시하는 api 호출
+  useEffect(() => {
       async function fetchQuestionConversations() {
         const response = await axiosClient.get<APIResponseMsg<ConversationSchemaState[]>>(`/api/conversations/details/${questionMstId}`)
         setQuestionConverstaion(response.data.data.find((question) => question.isQuestion == true))
       }
-      fetchQuestionConversations()
+      if (questionMstId && isOpen) {
+        fetchQuestionConversations()
+      }
     }, [questionMstId])
-  }
 
   const conversationQuestionWriteForm = useForm<z.infer<typeof ConversationQuestionWriteSchema>>({
     resolver: zodResolver(ConversationQuestionWriteSchema),

@@ -7,11 +7,14 @@ import MyProfileModifyButton from '@/components/space/MyProfileModifyButton'
 import { SpaceContext } from '@/components/space/space-context'
 import Timeline from '@/components/timeline'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ProfileSchemaState } from '@/schemas'
+import { APIResponseMsg, PagerConversationsState, ProfileSchemaState } from '@/schemas'
 import { AppDispatch, RootState } from '@/store'
 import { useDispatch, useSelector } from 'react-redux'
-import { useEffect, useState } from 'react'
-import { fetchConversations } from './conversationSlice'
+import React, { useEffect, useRef, useState } from 'react'
+import { fetchConversations, setConversations, appendConversation } from './conversationSlice'
+import { useInfiniteQuery } from '@tanstack/react-query'
+import axiosClient from '@/axios.config'
+import useFetchConversationsInfiniteQuery from '@/hooks/services/useConversationsQuery'
 
 interface SpacePageProps {
   ownerId: number
@@ -22,28 +25,54 @@ interface SpacePageProps {
 const SpaceForm = ({ ownerId, guestId, profileData }: SpacePageProps) => {
 
   const status = useSelector((state: RootState) => state.conversations.loading)
+  const conversations = useSelector((state: RootState) => state.conversations.entities)
+
+
   const dispatch: AppDispatch = useDispatch()
 
 
   const [maxMasterId, setMaxMasterId] = useState(0)
-  const conversations = useSelector((state: RootState) => state.conversations.entities)
-  
 
+
+  // 무한스크롤 페이징
+  const { infiniteQuery: conversationsInfiniteQurey, fetchNextPage } = useFetchConversationsInfiniteQuery(ownerId);
+  const targetRef = useRef()
+
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries, observer) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            fetchNextPage()
+          }
+        })
+      },
+      { threshold: 1 },
+    )
+
+    observer?.observe(targetRef?.current)
+
+    // return () => {
+    //   observer?.unobserve(targetRef?.current)
+    // }
+  }, [])
+  
   useEffect(() => {
     if (status === 'idle') {
       // conversations 가져오기
-      dispatch(fetchConversations(ownerId))
-      alert('fetchConversations-spaceform ')
-    }
-    if (status == 'successed') {
+      // dispatch(fetchConversations(ownerId))
+      if (conversationsInfiniteQurey.data) {
+        const newConversations = conversationsInfiniteQurey.data.pages.at(-1)
+        dispatch(appendConversation(newConversations.data.conversations));
+      }
+    }else if (status == 'successed') {
       setMaxMasterId(conversations?.length && conversations[0].mstId || 0)
     }
     
-  }, [dispatch, status])
+  }, [dispatch, status, conversationsInfiniteQurey.data])
 
-  useEffect(() => {
-    alert('maxMasterId:' + maxMasterId);
-  }, [maxMasterId])
+
 
 
   return (
@@ -55,6 +84,9 @@ const SpaceForm = ({ ownerId, guestId, profileData }: SpacePageProps) => {
           conversationsMaxMasterId: maxMasterId
         }}
       >
+        <span className='text-white'>
+          {JSON.stringify(conversationsInfiniteQurey.data?.pages)}
+        </span>
         <div className="flex flex-row justify-center min-h-screen bg-background">
           <div className="flex flex-col max-w-[574px] bg-background text-white pt-8 space-y-6 sm:px-2 w-full">
             <div className="flex flex-row justify-between">
@@ -81,9 +113,9 @@ const SpaceForm = ({ ownerId, guestId, profileData }: SpacePageProps) => {
             <p className="text-base font-semibold">{profileData?.introduce}</p>
             <div className="inline-flex space-x-4 text-xl font-semibold ">
               <label>답변</label>
-              <span>N개</span>
+              <span>{profileData?.answerCnt}개</span>
               <label>고마워요!</label>
-              <span>N개</span>
+              <span>{profileData?.likesCnt}개</span>
             </div>
             {/* 궁금해요 <> 프로필 편집 */}
 
@@ -106,6 +138,7 @@ const SpaceForm = ({ ownerId, guestId, profileData }: SpacePageProps) => {
               <TabsContent value="receive">
                 <div className="py-10">
                   <Timeline conversations={conversations} />
+                <div ref={targetRef}></div>
 
                   {/* 
               {[].length == 0 && <h2>작성된 질문이 없습니다.</h2>}

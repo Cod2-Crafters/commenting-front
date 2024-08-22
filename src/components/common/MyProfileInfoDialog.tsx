@@ -28,19 +28,13 @@ import InstagramIcon from '/public/assets/insta.svg'
 
 interface MyProfileInfoDialogProps {
   label: string
-  profileData: ProfileSchemaState
+  loadedProfileData: ProfileSchemaState
 }
 
-const MyProfileInfoDialog = ({ label, profileData }: MyProfileInfoDialogProps) => {
-  const { spaceOwnerId: ownerId } = useContext(SpaceContext)
-
-  // const [newAvatarPath, setNewAvatarPath] = useState(profileData.avatarPath)
-  console.log('profileData', profileData)
+const MyProfileInfoDialog = ({ label, loadedProfileData }: MyProfileInfoDialogProps) => {
+  const { spaceOwnerId } = useContext(SpaceContext)
 
   let auth = useSelector((state: RootState) => state.auth)
-
-  const router = useRouter()
-
   const formData = new FormData()
 
   const onProfileImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
@@ -66,25 +60,12 @@ const MyProfileInfoDialog = ({ label, profileData }: MyProfileInfoDialogProps) =
   const modifyProfileFormData = useForm<z.infer<typeof ProfileSchema>>({
     resolver: zodResolver(ProfileSchema),
     defaultValues: {
-      ...profileData,
+      ...loadedProfileData,
     },
   })
-  // useEffect(() => {
-  //   // 첫번째 렌더링에서 이후 default value는 빈값으로 나오게 됨.. 이후 다시 렌더링을 타게 되는데 이때 reset api를 통해 profile의 defaultValues로 초기화
-  // }, [profileData])
-
-  // useEffect(() => {
-  //   // 첫번째 렌더링에서 이후 default value는 빈값으로 나오게 됨.. 이후 다시 렌더링을 타게 되는데 이때 reset api를 통해 profile의 defaultValues로 초기화
-  //   modifyProfileFormData.reset({
-  //     ...profileData,
-  //   })
-  // }, [profileData])
-
-  // token =
-  //   'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyIiwiaXNzIjoiY29kZWNyYWZ0ZXIiLCJpYXQiOjE3MjAyNDIzODEsImV4cCI6MTcyMDMyODc4MX0.fM0-1Owjm13x5Vwn815nUo9l7msyBpHjiG0P4cSNpeYjad_Tn-g2vUlefBqY9R5YBbwBVsHXWTMt62kQVe51TA'
 
   const imageUpload = async () => {
-    const response = await axiosClient.post(`/api/profile/${ownerId}/avatar`, formData, {
+    const response = await axiosClient.post(`/api/profile/${spaceOwnerId}/avatar`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         Authorization: `Bearer ${auth.token || ''}`,
@@ -99,9 +80,8 @@ const MyProfileInfoDialog = ({ label, profileData }: MyProfileInfoDialogProps) =
     // data base64
     //alert('check' + JSON.stringify(values))
     // values.nickname = values.nickname === null ? '' : values.nickname
-    //location.reload()
-
-    alert('dd')
+    location.reload()
+    alert('formData:' + JSON.stringify(values))
   }
 
   return (
@@ -119,13 +99,11 @@ const MyProfileInfoDialog = ({ label, profileData }: MyProfileInfoDialogProps) =
           >
             {label}
           </Button>
-          {/* <>
-              <p className="max-w-[600px] p-4 text-wrap">
-                AUTH1: {JSON.stringify(auth)}
-              </p>
-            </> */}
         </DialogTrigger>
         <DialogContent className="max-w-[600px] min-h-[100px] p-4" aria-describedby={undefined}>
+          {/* {
+            JSON.stringify(modifyProfileFormData.formState.errors)
+          } */}
           <Form {...modifyProfileFormData}>
             <form onSubmit={modifyProfileFormData.handleSubmit(onSubmit)}>
               <div className="w-full -mt-2 text-right py-2 min-h-8">
