@@ -3,12 +3,13 @@ import ConversationQuestionWriteDialog from '../common/conversations/Conversatio
 
 interface AnswerWriteButtonProps {
   label?: string
+  questionMstId?: number
 }
 
-const AnswerWriteButton = ({ label }: AnswerWriteButtonProps) => {
+const AnswerWriteButton = ({ label, questionMstId = 0 }: AnswerWriteButtonProps) => {
   return (
     <>
-      <ConversationQuestionWriteDialog label={label} />
+      <ConversationQuestionWriteDialog label={label} questionMstId={questionMstId} />
     </>
   )
 }
