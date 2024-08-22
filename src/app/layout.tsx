@@ -1,7 +1,9 @@
+import NotificationManager from '@/components/alarm/NotificationManager'
 import Header from '@/components/common/Header'
 import { getSession } from '@/lib/login'
 import AuthProvider from '@/providers/next-auth'
 import TokenProvider from '@/providers/next-auth/TokenProvider'
+import ReactQueryProvider from '@/providers/ReactQueryProvider'
 import '@/styles/globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
@@ -67,14 +69,19 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${pretendard.variable} h-full`}>
       <head>
-        <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+
+
+        {/* <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" /> */}
       </head>
-        
+
       <body className="flex flex-col min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-modern-gray to-medium-gray h-full">
         <AuthProvider>
           <TokenProvider session={JSON.stringify(session)}>
-            <Header />
-            <div className="pt-16 mt-16 flex-grow">{children}</div>
+            <ReactQueryProvider>
+              <NotificationManager />
+              <Header />
+              <div className="pt-16 mt-16 flex-grow">{children}</div>
+            </ReactQueryProvider>
           </TokenProvider>
         </AuthProvider>
       </body>
