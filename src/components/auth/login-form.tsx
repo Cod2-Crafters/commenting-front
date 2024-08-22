@@ -14,7 +14,9 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { initSSE } from '@/lib/initSse'
 import { LoginSchema } from '@/schemas'
+import { useNotificationStore } from '@/stores/notifiicationStore'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -23,6 +25,9 @@ import { useEffect, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
 import * as z from 'zod'
+
+
+
 
 export const LoginForm = () => {
   const [error, setError] = useState<string | undefined>('')
@@ -97,8 +102,18 @@ export const LoginForm = () => {
                     // token : data
                   }),
                 )
+                // const eventSource = initSSE(data.data.token);
+                // useNotificationStore.getState().setEventSource(eventSource);
+
+                //sse api 호출
+                // /api/subscribe
                 router.push('/')
-                // console.log("쿠키 set!");
+                // console.log("쿠키 set!");\
+                // SSE 초기화 및 정리 함수 저장
+                // const cleanup = initSSE(data.data.token)
+
+                // 컴포넌트 언마운트 시 SSE 연결 종료
+                // return () => cleanup()
               }
             })
 
@@ -125,8 +140,8 @@ export const LoginForm = () => {
     //         window.location.href = kakaoUrl;
     //         break;
     //     case 'google':
-    //         const googleUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI}&response_type=code&scope=email+profile`;
-    //         window.open(googleUrl, '구글 로그인', 'width=700px, height=700px, scrollbars=yes');
+    const googleUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI}&response_type=code&scope=email+profile`;
+    window.open(googleUrl, '구글 로그인', 'width=700px, height=700px, scrollbars=yes');
     //         break;
     //     default:
     //         break;
@@ -134,93 +149,95 @@ export const LoginForm = () => {
   }
 
   return (
-    <div>
-      <h1 className="text-[25px] font-semibold text-center text-white pb-[20px]">
-        코멘팅 로그인
-      </h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      disabled={isPending}
-                      {...field}
-                      placeholder="이메일"
-                      // type="email"
-                      className="bg-surface w-[462px] h-[62.35px] rounded-md"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      disabled={isPending}
-                      placeholder="비밀번호"
-                      type="password"
-                      className="bg-surface w-[462px] h-[62.35px] rounded-md"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <FormSuccess message={success} />
-          <FormError message={error} />
-          <Button
-            disabled={isPending}
-            type="submit"
-            className="w-[462px] h-[62.35px] rounded-md text-black text-[18px]"
-          >
-            로그인
-          </Button>
-          <div className="flex flex-row justify-center mt-4 space-x-10">
-            <Link href="/find-id-pw" className="text-white">
-              ID/PW찾기
-            </Link>
-            <Link href="/auth/register" className="text-white">
-              회원가입
-            </Link>
-          </div>
-          <div className="flex justify-center mt-10 space-x-20">
-            <button
-              onClick={(e) => handleOAuthLogin(e, 'google')}
-              className="w-12 h-12 bg-white rounded-full flex items-center justify-center"
-            >
-              <Image
-                src="/icons/google.png"
-                alt="구글 로그인"
-                width={50}
-                height={50}
+    <>
+      <div>
+        <h1 className="text-[25px] font-semibold text-center text-white pb-[20px]">
+          코멘팅 로그인
+        </h1>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        disabled={isPending}
+                        {...field}
+                        placeholder="이메일"
+                        // type="email"
+                        className="bg-surface w-[462px] h-[62.35px] rounded-md"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </button>
-            <button
-              onClick={(e) => handleOAuthLogin(e, 'kakao')}
-              className="w-12 h-12 bg-white rounded-full flex items-center justify-center"
-            >
-              <Image
-                src="/icons/kakao.png"
-                alt="카카오톡 로그인"
-                width={50}
-                height={50}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        disabled={isPending}
+                        placeholder="비밀번호"
+                        type="password"
+                        className="bg-surface w-[462px] h-[62.35px] rounded-md"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </button>
-          </div>
-        </form>
-      </Form>
-    </div>
+            </div>
+            <FormSuccess message={success} />
+            <FormError message={error} />
+            <Button
+              disabled={isPending}
+              type="submit"
+              className="w-[462px] h-[62.35px] rounded-md text-black text-[18px]"
+            >
+              로그인
+            </Button>
+            <div className="flex flex-row justify-center mt-4 space-x-10">
+              <Link href="/find-id-pw" className="text-white">
+                ID/PW찾기
+              </Link>
+              <Link href="/auth/register" className="text-white">
+                회원가입
+              </Link>
+            </div>
+            <div className="flex justify-center mt-10 space-x-20">
+              <button
+                onClick={(e) => handleOAuthLogin(e, 'google')}
+                className="w-12 h-12 bg-white rounded-full flex items-center justify-center"
+              >
+                <Image
+                  src="/icons/google.png"
+                  alt="구글 로그인"
+                  width={50}
+                  height={50}
+                />
+              </button>
+              <button
+                onClick={(e) => handleOAuthLogin(e, 'kakao')}
+                className="w-12 h-12 bg-white rounded-full flex items-center justify-center"
+              >
+                <Image
+                  src="/icons/kakao.png"
+                  alt="카카오톡 로그인"
+                  width={50}
+                  height={50}
+                />
+              </button>
+            </div>
+          </form>
+        </Form>
+      </div>
+    </>
   )
 }

@@ -8,25 +8,25 @@ interface ReactQueryProviderProps {
     children: ReactNode
 }
 
-const ReactQueryProvider = ({children, ...props}: ReactQueryProviderProps) => {
+const ReactQueryProvider = ({ children, ...props }: ReactQueryProviderProps) => {
 
-const [client] = useState(new QueryClient({
-    defaultOptions: {
-        queries: {
-            //   staleTime: Infinity,
-            // ...
+    const [client] = useState(new QueryClient({
+        defaultOptions: {
+            queries: {
+                //   staleTime: Infinity,
+                // ...
+            },
         },
-      },
-}));
+    }));
 
-//const client = new QueryClient();
+    //const client = new QueryClient();
 
-  return (
-    <QueryClientProvider client={client}>
-      {children}
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
-  )
+    return (
+        <QueryClientProvider client={client}>
+            {children}
+            <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+    )
 }
 
 export default ReactQueryProvider

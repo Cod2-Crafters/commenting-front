@@ -1,7 +1,6 @@
 'use client'
-interface HeaderProps {}
+interface HeaderProps { }
 
-import { clearCredentials } from '@/app/auth/authSlice'
 import { RootState } from '@/store'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -11,12 +10,18 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useOutsideClick } from '../../hooks/useOutsideClick'
 import { Button } from '../ui/button'
 import HamburgerIcon from '/public/assets/ham.svg'
+import { clearCredentials } from '@/app/auth/authSlice'
+import { useNotificationStore } from '@/stores/notifiicationStore'
 
 const Header = (props: HeaderProps) => {
+  const token = useSelector((state: RootState) => state.auth.token);
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const notifications = useNotificationStore((state) => state.notifications);
+  const unreadCount = notifications.filter((notif) => !notif.isRead).length;
+  const { clearEventSource } = useNotificationStore();
 
-  const token = useSelector((state: RootState) => state.auth.token)
-  const router = useRouter()
-  const dispatch = useDispatch()
+
 
   const [isMenuVisible, setIsMenuVisible] = useState(false)
 
@@ -28,16 +33,19 @@ const Header = (props: HeaderProps) => {
         'Content-Type': 'application/json',
       },
     }).then(async (response) => {
+      setIsMenuVisible(false)
+
       if (response.ok) {
-        dispatch(clearCredentials())
-        console.log('logout response', response)
-        router.push('/')
+        clearEventSource();
+        dispatch(clearCredentials());
+        window.location.reload();
       }
     })
   }
   const login = () => {
-    //router.push('/auth/login')
-    redirect('/auth/login')
+    console.log('로그인')
+    router.push('/auth/login');
+    setIsMenuVisible(false)
   }
   const navigateSpace = (event: MouseEvent) => {
     router.push('/space')
@@ -54,7 +62,7 @@ const Header = (props: HeaderProps) => {
   })
 
   return (
-    <header className="w-full bg-background">
+    <header className=" fixed top-0 left-0 w-full bg-background " style={{ zIndex: 100 }}>
       <div className="flex max-w-[1230px] m-auto py-8 justify-between items-center px-2">
         <a href={'/'}>
           <h2 className="text-primary font-light text-2xl">
@@ -66,7 +74,18 @@ const Header = (props: HeaderProps) => {
           className="cursor-pointer focus:text-red-300 focus:bg-red-300"
         >
           <div className="flex items-center relative w-full">
+            <div className='relative flex flex-row'>
+              <Image src="/icons/bell.png" alt="bell" width={15} height={10} onClick={() => {
+                router.push('/notifications');
+              }} />
+              {unreadCount > 0 && (
+                <span className="absolute top-0 right-8 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
             <Button variant={'link'} onClick={handleOnMenuClick}>
+
               <HamburgerIcon width={25} height={11} />
             </Button>
             {/* <div className="pr-10"></div> */}
@@ -103,7 +122,9 @@ const Header = (props: HeaderProps) => {
                   </div>
 
                   <div className="text-white text-nowrap">
-                    <Link href={'#'}>
+                    {/* <Link href={'#'}> */}
+
+                    {token ? (
                       <Button
                         variant={null}
                         className="hover:bg-surface rounded-md block p-2 transition-colors text-left w-full"
@@ -114,7 +135,13 @@ const Header = (props: HeaderProps) => {
                       >
                         로그아웃
                       </Button>
-                    </Link>
+                    ) : (
+                      <Button variant={null} className="hover:bg-surface rounded-md block p-2 transition-colors text-left w-full" onClick={login}>
+                        로그인
+                      </Button>
+                    )}
+
+                    {/* </Link> */}
                     {/* 
                     <Button
                       variant={null}
