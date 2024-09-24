@@ -8,9 +8,7 @@ import '@/styles/globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import localFont from 'next/font/local'
-// import { Provider } from 'react-redux';
-// import {store} from '@/store'
-
+import { Suspense } from 'react'
 const inter = Inter({ subsets: ['latin'] })
 
 const pretendard = localFont({
@@ -63,12 +61,17 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const session = await getSession()
+  const token = session?.user?.token || null;
 
   console.log('rootLayout-session:', session)
 
   return (
     <html lang="en" className={`${pretendard.variable} h-full`}>
       <head>
+        <meta
+          httpEquiv="Cross-Origin-Opener-Policy"
+          content="same-origin-allow-popups"
+        />
 
 
         {/* <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" /> */}
@@ -79,7 +82,7 @@ export default async function RootLayout({
           <TokenProvider session={JSON.stringify(session)}>
             <ReactQueryProvider>
               <NotificationManager />
-              <Header />
+              <Header token={token} />
               <div className="pt-16 mt-16 flex-grow">{children}</div>
             </ReactQueryProvider>
           </TokenProvider>

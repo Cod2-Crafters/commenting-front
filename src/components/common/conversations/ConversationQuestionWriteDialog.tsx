@@ -27,9 +27,10 @@ interface AnswerWriteDialogProps {
   questionMstId?: number
   label: string
   children?: ReactNode
+  onAnswerSubmit: () => void;
 }
 
-const AnswerWriteDialog = ({ questionMstId, label }: AnswerWriteDialogProps) => {
+const AnswerWriteDialog = ({ questionMstId, label, onAnswerSubmit }: AnswerWriteDialogProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [questionConversation, setQuestionConverstaion] = useState<ConversationSchemaState>()
   const { spaceOwnerId, showerGuestId, conversationsMaxMasterId } = useSpaceContext()
@@ -37,14 +38,14 @@ const AnswerWriteDialog = ({ questionMstId, label }: AnswerWriteDialogProps) => 
 
   // 질문 작성 다이얼로그에서 질문 표시하는 api 호출
   useEffect(() => {
-      async function fetchQuestionConversations() {
-        const response = await axiosClient.get<APIResponseMsg<ConversationSchemaState[]>>(`/api/conversations/details/${questionMstId}`)
-        setQuestionConverstaion(response.data.data.find((question) => question.isQuestion == true))
-      }
-      if (questionMstId && isOpen) {
-        fetchQuestionConversations()
-      }
-    }, [questionMstId])
+    async function fetchQuestionConversations() {
+      const response = await axiosClient.get<APIResponseMsg<ConversationSchemaState[]>>(`/api/conversations/details/${questionMstId}`)
+      setQuestionConverstaion(response.data.data.find((question) => question.isQuestion == true))
+    }
+    if (questionMstId && isOpen) {
+      fetchQuestionConversations()
+    }
+  }, [questionMstId])
 
   const conversationQuestionWriteForm = useForm<z.infer<typeof ConversationQuestionWriteSchema>>({
     resolver: zodResolver(ConversationQuestionWriteSchema),
@@ -61,7 +62,7 @@ const AnswerWriteDialog = ({ questionMstId, label }: AnswerWriteDialogProps) => 
 
   async function onSubmit(values: z.infer<typeof ConversationQuestionWriteSchema>) {
     // 작성 완료
-   
+
     alert('answer write success' + JSON.stringify(values) + '@' + conversationsMaxMasterId)
     if (questionMstId === 0) {
       // 질문 작성
@@ -72,6 +73,7 @@ const AnswerWriteDialog = ({ questionMstId, label }: AnswerWriteDialogProps) => 
       alert('답변작성');
       values.mstId = questionMstId
       dispatch(createAnswer(values))
+      if (onAnswerSubmit) onAnswerSubmit();
     }
 
     // const response = await axiosClient.post<APIResponseMsg<number | string>>(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/conversations/question`, {...values, mstId: conversationsMaxMasterId})
@@ -102,7 +104,7 @@ const AnswerWriteDialog = ({ questionMstId, label }: AnswerWriteDialogProps) => 
         <DialogContent className="w-[600px] min-h-[100px] p-4" aria-describedby={undefined}>
           <Form {...conversationQuestionWriteForm}>
             <form onSubmit={conversationQuestionWriteForm.handleSubmit(onSubmit)}>
-              {}
+              { }
               <div className="w-full -mt-2 text-right py-2 min-h-8">
                 <Button type="submit" variant={'primary'} size={'lg'} className="text-right">
                   저장

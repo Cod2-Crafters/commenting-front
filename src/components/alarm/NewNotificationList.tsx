@@ -7,6 +7,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { useNotificationStore } from "@/stores/notifiicationStore";
+import NotificationDialog from "./NotificationDialog";
+import { useState } from "react";
 
 async function getNotifications(token: string) {
     const { data } = await axiosClient.get('/api/notifications', {
@@ -26,9 +28,13 @@ async function markAllNotificationsAsRead(token: string) {
     return data;
 }
 
-function NewNotificationList() {
+function NewNotificationList({ guestId }) {
     const token = useSelector((state: RootState) => state.auth.token);
     const queryClient = useQueryClient();
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [selectedMstId, setSelectedMstId] = useState(null);
+    // const session = await getSession()
+
     const { clearNotifications, clearEventSource } = useNotificationStore();
     const { data, isLoading, isError } = useQuery({
         queryKey: ['notification', token],
@@ -41,23 +47,23 @@ function NewNotificationList() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notification', token] });
             clearNotifications();
-            // clearNo
-            // useNotificationStore.
         },
     });
 
-    const closeEvent = () => {
-        console.log('이벤트 끊기');
-        clearEventSource();
-    }
-
     const notifications = data?.data;
 
+    const openDialog = (mstId: number) => {
+        console.log(mstId)
+        setSelectedMstId(mstId);
+        if (!dialogOpen) setDialogOpen(true);
+    }
     if (isLoading) return <div>Loading...</div>;
     if (isError) return <div>Error fetching notifications</div>;
 
     return (
         <div className="container mx-auto">
+            <NotificationDialog isOpen={dialogOpen} setIsOpen={setDialogOpen} mstId={selectedMstId} showerGuestId={guestId} />
+
             <div className="bg-gray-900 text-white p-4">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold">알림</h2>
@@ -78,6 +84,7 @@ function NewNotificationList() {
                                 key={notification.id}
                                 className={`flex items-center mb-4 pb-4 border-b border-gray-700 ${!notification.isRead ? 'bg-gray-800' : ''
                                     }`}
+                                onClick={() => { openDialog(notification.mstId) }}
                             >
                                 <div className="mr-4 text-red-500">❤️</div>
                                 <Image

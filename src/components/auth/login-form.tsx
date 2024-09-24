@@ -48,15 +48,53 @@ export const LoginForm = () => {
   useEffect(() => {
     const handleMessage = (event: {
       origin: string
-      data: { token: string }
+      data: { token: string, email: string, id: number }
     }) => {
       if (event.origin !== 'http://localhost:3000') return
-      const { token } = event.data
-      if (token) {
-        console.log('Received token:', token)
+      const { token, email, id } = event.data
+      if (token && email && id) {
+        console.log('Received token:', token + 'email:', email);
+        fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userid: id,
+            email: email,
+            token: token,
+          }),
+        }).then(async (cookieResponse) => {
+          console.log(cookieResponse)
+          setSuccess('로그인이 성공적으로 완료되었습니다.')
+
+          if (cookieResponse.ok) {
+            window.addEventListener('message', (event) => {
+              if (event.origin !== window.location.origin) return;
+              const { token, email, id: userId } = event.data;
+              dispatch(
+                setCredentials({
+                  user: { email },
+                  token,
+                  userId,
+                })
+              );
+              router.push('/');
+            });
+            // dispatch(
+            //   setCredentials({
+            //     user: { email: email },
+            //     token: token,
+            //     userId: id
+            //   }),
+            // )
+            // router.push('/');
+          }
+        })
       }
     }
     window.addEventListener('message', handleMessage)
+
     return () => {
       window.removeEventListener('message', handleMessage)
     }
@@ -99,21 +137,10 @@ export const LoginForm = () => {
                   setCredentials({
                     user: { email: values.email },
                     token: data.data.token,
-                    // token : data
+                    userId: data.data.id
                   }),
                 )
-                // const eventSource = initSSE(data.data.token);
-                // useNotificationStore.getState().setEventSource(eventSource);
-
-                //sse api 호출
-                // /api/subscribe
                 router.push('/')
-                // console.log("쿠키 set!");\
-                // SSE 초기화 및 정리 함수 저장
-                // const cleanup = initSSE(data.data.token)
-
-                // 컴포넌트 언마운트 시 SSE 연결 종료
-                // return () => cleanup()
               }
             })
 

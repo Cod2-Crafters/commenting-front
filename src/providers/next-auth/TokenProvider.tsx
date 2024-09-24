@@ -21,6 +21,7 @@ const TokenProvider = ({ session, ...props }: Props) => {
         setCredentials({
           user: { email: sessionObj.user.email },
           token: sessionObj.user.token,
+          userId: sessionObj.user.userId
         }),
       )
     }

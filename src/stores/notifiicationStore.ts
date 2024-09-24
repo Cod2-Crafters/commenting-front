@@ -1,6 +1,8 @@
 // notificationStore.ts
 'use client'
-import create from 'zustand'
+import { selectUserId } from '@/app/auth/authSlice'
+import { useSelector } from 'react-redux'
+import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 type NotificationType = {
@@ -8,6 +10,8 @@ type NotificationType = {
   message: string
   timestamp: Date
   isRead: boolean
+  ownerId?: number
+  // userId : number
 }
 
 type NotificationStore = {
@@ -22,10 +26,11 @@ type NotificationStore = {
 
 const useNotificationStore = create<NotificationStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       notifications: [],
       eventSource: null,
-      addNotification: (message) =>
+      addNotification: (message) => {
+        const userId = useSelector(selectUserId)
         set((state) => ({
           notifications: [
             {
@@ -33,10 +38,12 @@ const useNotificationStore = create<NotificationStore>()(
               message,
               timestamp: new Date(),
               isRead: false,
+              userId: userId,
             },
             ...state.notifications,
           ],
-        })),
+        }))
+      },
       markAsRead: (id) =>
         set((state) => ({
           notifications: state.notifications.map((notif) => (notif.id === id ? { ...notif, read: true } : notif)),
