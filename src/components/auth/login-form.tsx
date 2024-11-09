@@ -36,14 +36,51 @@ export const LoginForm = () => {
   })
 
   useEffect(() => {
-    const handleMessage = (event: { origin: string; data: { token: string } }) => {
+    const handleMessage = (event: { origin: string; data: { token: string, email: string, id: number } }) => {
       if (event.origin !== 'http://localhost:3000') return
-      const { token } = event.data
-      if (token) {
-        console.log('Received token:', token)
+      const { token, email, id } = event.data
+      if (token && email && id) {
+        console.log('Received token:', token + 'email:', email);
+        fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userid: id,
+            email: email,
+            token: token,
+          }),
+        }).then(async (cookieResponse) => {
+          console.log(cookieResponse)
+          setSuccess('로그인이 성공적으로 완료되었습니다.')
+
+          if (cookieResponse.ok) {
+            window.addEventListener('message', (event) => {
+              if (event.origin !== window.location.origin) return;
+              const { token, email, id: userId } = event.data;
+              dispatch(
+                setCredentials({
+                  user: { email, userid: userId, avatarPath: ''  },
+                  token,
+                })
+              );
+              router.push('/');
+            });
+            // dispatch(
+            //   setCredentials({
+            //     user: { email: email },
+            //     token: token,
+            //     userId: id
+            //   }),
+            // )
+            // router.push('/');
+          }
+        })
       }
     }
     window.addEventListener('message', handleMessage)
+
     return () => {
       window.removeEventListener('message', handleMessage)
     }

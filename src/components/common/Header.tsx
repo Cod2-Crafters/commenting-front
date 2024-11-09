@@ -64,6 +64,13 @@ const Header = (props: HeaderProps) => {
     }
   })
 
+
+  useEffect(() => {
+    if (notifications) {
+      const count = notifications.filter((notif) => !notif.isRead).length;
+      setUnreadCount(count);
+    }
+  }, [notifications]);
   return (
     <header className="top-0 left-0 w-full bg-background " style={{ zIndex: 100 }}>
       <div className="flex max-w-[1230px] m-auto py-8 justify-between items-center px-2">
@@ -74,24 +81,20 @@ const Header = (props: HeaderProps) => {
         </a>
         <div ref={ref} className="cursor-pointer focus:text-red-300 focus:bg-red-300">
           <div className="flex items-center relative w-full">
-            <div className="relative flex flex-row">
-              <Image
-                src="/icons/bell.png"
-                alt="bell"
-                width={15}
-                height={10}
-                onClick={() => {
-                  router.push('/notifications')
-                }}
-              />
-              {unreadCount > 0 && <span className="absolute top-0 right-8 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">{unreadCount}</span>}
+            <div className='relative flex flex-row'>
+              <Image src="/icons/bell.png" alt="bell" width={15} height={10} onClick={() => {
+                router.push('/notifications');
+              }} />
+              {unreadCount > 0 && <span className="absolute top-0 right-8 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                {unreadCount}
+              </span>}
             </div>
             <Button variant={'link'} onClick={handleOnMenuClick}>
               <HamburgerIcon width={25} height={11} />
             </Button>
-
-            {/* round menu */}
-            <div className={`absolute top-10 right-0 cursor-default ${!isMenuVisible ? 'hidden' : 'visibility'} `}>
+            <div
+              className={`absolute top-10 right-0 cursor-default ${!isMenuVisible ? 'hidden' : 'visibility'} `}
+            >
               <div className="bg-black min-h-20 rounded-2xl py-6 px-10">
                 <div className="flex flex-col space-y-2 m-auto">
                   {/* menu items */}
@@ -104,8 +107,12 @@ const Header = (props: HeaderProps) => {
                   </div>
 
                   <div className="text-white text-nowrap">
-                    <Link href={'/notification'}>
-                      <Button variant={null} className="hover:bg-surface rounded-md block p-2 transition-colors text-left w-full" onClick={handleOnMenuClick}>
+                    <Link href={'/notifications'}>
+                      <Button
+                        variant={null}
+                        className="hover:bg-surface rounded-md block p-2 transition-colors text-left w-full"
+                        onClick={handleOnMenuClick}
+                      >
                         알림
                       </Button>
                     </Link>
@@ -121,8 +128,6 @@ const Header = (props: HeaderProps) => {
                   </div>
 
                   <div className="text-white text-nowrap">
-                    {/* <Link href={'#'}> */}
-
                     {token ? (
                       <Button
                         variant={null}
@@ -139,40 +144,10 @@ const Header = (props: HeaderProps) => {
                         로그인
                       </Button>
                     )}
-
-                    {/* </Link> */}
-                    {/* 
-                    <Button
-                      variant={null}
-                      className="hover:bg-surface rounded-md block p-2 transition-colors text-left w-full"
-                      onClick={(event) => {
-                        handleOnMenuClick(event)
-                        logout()
-                      }}
-                    >
-                      로그아웃
-                    </Button> */}
                   </div>
                 </div>
               </div>
             </div>
-
-            {/* {token ? (
-              <Button className="w-[62px] h-[32px] text-black" onClick={logout}>
-                로그아웃
-              </Button>
-            ) : (
-              <Button className="w-[62px] h-[32px] text-black" onClick={login}>
-                로그인
-              </Button>
-            )}
-
-            <Button
-              className="w-[62px] h-[32px] text-black"
-              onClick={navigateSpace}
-            >
-              스페이스로 이동
-            </Button> */}
           </div>
         </div>
       </div>
