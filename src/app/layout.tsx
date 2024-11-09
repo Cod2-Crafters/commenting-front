@@ -11,7 +11,6 @@ import localFont from 'next/font/local'
 // import { Provider } from 'react-redux';
 // import {store} from '@/store'
 
-const inter = Inter({ subsets: ['latin'] })
 
 const pretendard = localFont({
   src: [
@@ -62,23 +61,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const session = await getSession()
-
-  console.log('rootLayout-session:', session)
+  const session = await getSession();
+  // console.log('rootLayout-session:', session)
 
   return (
     <html lang="en" className={`${pretendard.variable} h-full`}>
       <head>
-
-
         {/* <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" /> */}
       </head>
 
       <body className="flex flex-col min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-modern-gray to-medium-gray h-full">
         <AuthProvider>
-          <TokenProvider session={JSON.stringify(session)}>
+          <TokenProvider session={session}>
             <ReactQueryProvider>
-              <NotificationManager />
+              {/* <NotificationManager /> */}
               <Header />
               <div className="pt-16 mt-16 flex-grow">{children}</div>
             </ReactQueryProvider>

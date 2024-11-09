@@ -1,29 +1,30 @@
 'use client'
 import { setCredentials } from '@/app/auth/authSlice'
+import { TokenPayload } from '@/lib/login'
 import { RootState } from '@/store'
+import { JWTPayload } from 'jose'
 import { ReactNode } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
 type Props = {
-  session?: string
+  session?: JWTPayload & TokenPayload
   children: ReactNode
 }
 
 const TokenProvider = ({ session, ...props }: Props) => {
   const dispatch = useDispatch()
   const auth = useSelector((state: RootState) => state.auth)
-  console.log('auth-provider-token-1', auth.token)
-  const sessionObj = JSON.parse(session)
+  console.log('token-provider:', session);
 
-  if (sessionObj) {
-    if (auth.token == null) {
-      dispatch(
-        setCredentials({
-          user: { email: sessionObj.user.email },
-          token: sessionObj.user.token,
-        }),
-      )
-    }
+  if (session && !auth.token) {
+    dispatch(
+      setCredentials({
+        user: {
+          ...session.user
+        },
+        token: session.user.token
+      }),
+    )
   }
 
   return <>{props.children}</>

@@ -1,7 +1,7 @@
 'use client'
 import * as z from 'zod'
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden'
-import { ChangeEvent, useContext } from 'react'
+import { ChangeEvent, Dispatch, SetStateAction, useContext } from 'react'
 import ProfileLabel from '../profile/ProfileLabel'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog'
 import { Input } from '../ui/input'
@@ -29,10 +29,19 @@ import InstagramIcon from '/public/assets/insta.svg'
 interface MyProfileInfoDialogProps {
   label: string
   loadedProfileData: ProfileSchemaState
+  isOpen: boolean
+  setIsOpen: Dispatch<SetStateAction<boolean>>
 }
 
-const MyProfileInfoDialog = ({ label, loadedProfileData }: MyProfileInfoDialogProps) => {
+const MyProfileInfoDialog = ({ label, loadedProfileData, isOpen, setIsOpen }: MyProfileInfoDialogProps) => {
   const { spaceOwnerId } = useContext(SpaceContext)
+
+  const modifyProfileFormData = useForm<z.infer<typeof ProfileSchema>>({
+    resolver: zodResolver(ProfileSchema),
+    defaultValues: {
+      ...loadedProfileData,
+    },
+  })
 
   let auth = useSelector((state: RootState) => state.auth)
   const formData = new FormData()
@@ -57,12 +66,6 @@ const MyProfileInfoDialog = ({ label, loadedProfileData }: MyProfileInfoDialogPr
     }
     reader.readAsDataURL(uploadFile)
   }
-  const modifyProfileFormData = useForm<z.infer<typeof ProfileSchema>>({
-    resolver: zodResolver(ProfileSchema),
-    defaultValues: {
-      ...loadedProfileData,
-    },
-  })
 
   const imageUpload = async () => {
     const response = await axiosClient.post(`/api/profile/${spaceOwnerId}/avatar`, formData, {
@@ -75,18 +78,24 @@ const MyProfileInfoDialog = ({ label, loadedProfileData }: MyProfileInfoDialogPr
   }
 
   async function onSubmit(values: z.infer<typeof ProfileSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    // data base64
-    //alert('check' + JSON.stringify(values))
-    // values.nickname = values.nickname === null ? '' : values.nickname
-    location.reload()
-    alert('formData:' + JSON.stringify(values))
+    alert('onSubmit! ' + JSON.stringify(values))
+    const response = await axiosClient.put(`/api/profile/${spaceOwnerId}`, {...values}, {
+      headers: {
+        Authorization: `Bearer ${auth.token}`,
+      },
+    })
+
+    if (formData.has('avatar')) {
+      await imageUpload();
+      alert('change avatar')
+    }
+    setIsOpen(false);
+    location.reload();
   }
 
   return (
     <>
-      <Dialog>
+      <Dialog onOpenChange={setIsOpen} open={isOpen}>
         {/* button of button solution asChilid=true */}
         <DialogTrigger asChild>
           <Button
@@ -94,7 +103,7 @@ const MyProfileInfoDialog = ({ label, loadedProfileData }: MyProfileInfoDialogPr
             variant={'outline'}
             asChild={false}
             onClick={() => {
-              modifyProfileFormData.reset()
+              modifyProfileFormData.reset(loadedProfileData)
             }}
           >
             {label}
@@ -130,7 +139,7 @@ const MyProfileInfoDialog = ({ label, loadedProfileData }: MyProfileInfoDialogPr
                           control={modifyProfileFormData.control}
                           name="avatarPath"
                           render={({ field }) => {
-                            // console.log(field)
+                            // console.log('@@@@@@@', field.value)
                             return (
                               <>
                                 <FormControl>

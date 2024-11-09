@@ -2,7 +2,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Image from 'next/image'
 
-import AnswerWriteButton from '@/components/space/ConversationQuestionWriteButton'
 import MyProfileModifyButton from '@/components/space/MyProfileModifyButton'
 import { SpaceContext } from '@/components/space/space-context'
 import Timeline from '@/components/timeline'
@@ -10,34 +9,49 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { APIResponseMsg, PagerConversationsState, ProfileSchemaState } from '@/schemas'
 import { AppDispatch, RootState } from '@/store'
 import { useDispatch, useSelector } from 'react-redux'
-import React, { useEffect, useRef, useState } from 'react'
-import { fetchConversations, setConversations, appendConversation } from './conversationSlice'
-import { useInfiniteQuery } from '@tanstack/react-query'
-import axiosClient from '@/axios.config'
+import React, { startTransition, Suspense, useEffect, useRef, useState } from 'react'
+import { fetchConversations, setConversations, appendConversation, clearConversation } from './conversationSlice'
+import { redirect } from 'next/navigation'
+import QuestionWriteModifyButton from '@/components/space/QuestionWriteModifyButton'
 import useFetchConversationsInfiniteQuery from '@/hooks/services/useConversationsQuery'
+import ContentLayout from '@/components/layouts/content-layout'
+import { useQueryClient } from '@tanstack/react-query'
+import { getImageUrl } from '@/lib/utils'
 
 interface SpacePageProps {
-  ownerId: number
-  guestId: number
-  profileData: ProfileSchemaState
+  ownerId: number // 조회대상 (주인)
+  guestId: number // 로그인 사용자
+  ownerProfileData: ProfileSchemaState // 조회하려는 정보
+  guestProfileData: ProfileSchemaState // 로그인 사용자의 정보
 }
 
-const SpaceForm = ({ ownerId, guestId, profileData }: SpacePageProps) => {
-
+const SpaceForm = ({ ownerId, guestId, ownerProfileData, guestProfileData }: SpacePageProps) => {
+  const queryClient = useQueryClient()
   const status = useSelector((state: RootState) => state.conversations.loading)
   const conversations = useSelector((state: RootState) => state.conversations.entities)
 
+  const sendConversationsStatus = useSelector((state: RootState) => state.sendConversations.loading)
+  const sendConversations = useSelector((state: RootState) => state.sendConversations.entities)
 
   const dispatch: AppDispatch = useDispatch()
-
-
   const [maxMasterId, setMaxMasterId] = useState(0)
+  const loginUserToken = useSelector((state: RootState) => state.auth.token)
+  const loginUserToken2 = useSelector((state: RootState) => state.auth.user)
 
+  const [selectedTab, setSetselectedTab] = useState<'receive' | 'send'>('receive')
+
+  const [ownerProfileStateData, SetOwnerProfileStateData] = useState<ProfileSchemaState>()
+  const [guestProfileStateData, SetGuestProfileStateData] = useState<ProfileSchemaState>()
+
+  useEffect(() => {
+    SetOwnerProfileStateData({ ...ownerProfileData, avatarPath: getImageUrl(ownerProfileData.avatarPath) })
+    SetGuestProfileStateData({ ...guestProfileData, avatarPath: getImageUrl(guestProfileData.avatarPath) })
+  }, [ownerId, guestId])
 
   // 무한스크롤 페이징
-  const { infiniteQuery: conversationsInfiniteQurey, fetchNextPage } = useFetchConversationsInfiniteQuery(ownerId);
-  const targetRef = useRef()
-
+  const { infiniteQuery: conversationsInfiniteQurey, fetchNextPage } = useFetchConversationsInfiniteQuery(selectedTab, ownerId, guestId)
+  const targetRefByRecv = useRef()
+  const targetRefBySend = useRef()
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -51,29 +65,39 @@ const SpaceForm = ({ ownerId, guestId, profileData }: SpacePageProps) => {
       { threshold: 1 },
     )
 
-    observer?.observe(targetRef?.current)
-
-    // return () => {
-    //   observer?.unobserve(targetRef?.current)
-    // }
-  }, [])
-  
-  useEffect(() => {
-    if (status === 'idle') {
-      // conversations 가져오기
-      // dispatch(fetchConversations(ownerId))
-      if (conversationsInfiniteQurey.data) {
-        const newConversations = conversationsInfiniteQurey.data.pages.at(-1)
-        dispatch(appendConversation(newConversations.data.conversations));
-      }
-    }else if (status == 'successed') {
-      setMaxMasterId(conversations?.length && conversations[0].mstId || 0)
+    if (selectedTab === 'receive') {
+      observer?.observe(targetRefByRecv?.current)
+    } else if (selectedTab === 'send') {
+      observer?.observe(targetRefBySend?.current)
     }
-    
-  }, [dispatch, status, conversationsInfiniteQurey.data])
+    return () => {
+      //   return observer?.unobserve(targetRef?.current)
+    }
+  }, [selectedTab])
 
+  useEffect(() => {
+    // conversations 가져오기
+    if (conversationsInfiniteQurey.data) {
+      const newConversations = conversationsInfiniteQurey.data.pages.at(-1)
+      dispatch(appendConversation(newConversations.data.conversations))
+    }
+  }, [conversationsInfiniteQurey?.data?.pages.length]) // 맨 끝페이지가 아닌 경우에만 불러옴
 
+  // maxMasterId 자동 할당
+  useEffect(() => {
+    setMaxMasterId(conversations[0]?.mstId || 0)
+  }, [0 < conversations?.length, selectedTab])
 
+  if (!guestId) {
+    redirect('/auth/login')
+    return
+  }
+
+  function handleOnTabChange(value: 'receive' | 'send'): void {
+    dispatch(clearConversation())
+    queryClient.invalidateQueries({ queryKey: ['conversation', selectedTab] })
+    setSetselectedTab(value)
+  }
 
   return (
     <>
@@ -81,169 +105,99 @@ const SpaceForm = ({ ownerId, guestId, profileData }: SpacePageProps) => {
         value={{
           spaceOwnerId: ownerId,
           showerGuestId: guestId,
-          conversationsMaxMasterId: maxMasterId
+          writeMaxMstId: maxMasterId,
+          guestProfileData: guestProfileStateData,
+          ownerProfileData: ownerProfileStateData,
         }}
       >
-        <span className='text-white'>
-          {JSON.stringify(conversationsInfiniteQurey.data?.pages)}
-        </span>
-        <div className="flex flex-row justify-center min-h-screen bg-background">
-          <div className="flex flex-col max-w-[574px] bg-background text-white pt-8 space-y-6 sm:px-2 w-full">
-            <div className="flex flex-row justify-between">
-              <div className="flex flex-col justify-center ">
-                <p className="text-2xl font-semibold">{profileData?.email}</p>
-                <p className="mt-1 text-base font-semibold text-white">{profileData?.nickname}</p>
-              </div>
-              {/* <Image
+        <div className="text-red-300 fixed">
+          {/* <p>TOKEN1: {JSON.stringify(loginUserToken)}</p>
+          <p>TOKEN-USER: {JSON.stringify(loginUserToken2)}@</p> */}
+          <p>{conversationsInfiniteQurey?.status}</p>
+          <p>{conversationsInfiniteQurey?.error?.stack}</p>
+          <p>#hasNextPage:#{conversationsInfiniteQurey.hasNextPage === true ? 'O' : 'X'}</p>
+          <p>isFetched#{conversationsInfiniteQurey.isFetched === true ? 'O' : 'X'}</p>
+          <p>isLoading#{conversationsInfiniteQurey.isLoading === true ? 'O' : 'X'}</p>
+          <p>maxMstId: {maxMasterId}</p>
+          <p>{conversationsInfiniteQurey?.data?.pages?.length}</p>
+          {/* <p className='text-green-200'>
+            {JSON.stringify(conversationsInfiniteQurey?.data?.pages)}
+          </p> */}
+        </div>
+        <ContentLayout>
+          {/* <div className="flex flex-row justify-center min-h-screen bg-background">
+          <div className="flex flex-col max-w-[574px] bg-background text-white pt-8 space-y-6 sm:px-2 w-full"> */}
+          <span className="text-green-300">{status.toString()}</span>
+          <div className="flex flex-row justify-between">
+            <div className="flex flex-col justify-center ">
+              <p className="text-2xl font-semibold">{ownerProfileData?.email}</p>
+              <p className="mt-1 text-base font-semibold text-white">{ownerProfileData?.nickname}</p>
+            </div>
+            {/* <Image
             className="rounded-full bg-gradient-to-tl to-orange-200 from-stone-100 border-1 border-white"
             src="/assets/no-user.png"
             width={84}
             height={84}
             alt="image"
           /> */}
-              <Avatar className="w-[84px] h-[84px]">
-                <AvatarImage src={profileData?.avatarPath} alt="profile" />
-                <AvatarFallback>
-                  <div>
-                    <Image className="rounded-full bg-gradient-to-tl to-orange-200 from-stone-100 border-0 border-white p-1" src="/assets/no-user.png" alt="profile" width={84} height={84} />
-                  </div>
-                </AvatarFallback>
-              </Avatar>
-            </div>
-            <p className="text-base font-semibold">{profileData?.introduce}</p>
-            <div className="inline-flex space-x-4 text-xl font-semibold ">
-              <label>답변</label>
-              <span>{profileData?.answerCnt}개</span>
-              <label>고마워요!</label>
-              <span>{profileData?.likesCnt}개</span>
-            </div>
-            {/* 궁금해요 <> 프로필 편집 */}
+            <Avatar className="w-[84px] h-[84px]">
+              <AvatarImage src={ownerProfileStateData?.avatarPath} alt="profile" />
+              <AvatarFallback>
+                <div>
+                  <Image className="rounded-full bg-gradient-to-tl to-orange-200 from-stone-100 border-0 border-white p-1" src="/assets/no-user.png" alt="profile" width={84} height={84} />
+                </div>
+              </AvatarFallback>
+            </Avatar>
+          </div>
+          <p className="text-base font-semibold">{ownerProfileData?.introduce}</p>
 
-            {(guestId || ownerId) && <MyProfileModifyButton label="프로필 편집" data={profileData} />}
+          {/* 궁금해요 <> 프로필 편집 */}
+          <>
+            {guestId === ownerId && <MyProfileModifyButton label="프로필 편집" data={guestProfileStateData} />}
 
-            {/* 궁금해요 시작 */}
-            {(guestId || ownerId) && <AnswerWriteButton label="궁금해요 (test)" />}
+            {/* 궁금해요 버튼 */}
+            {guestId !== ownerId && <QuestionWriteModifyButton type="write" />}
+            <span>
+              gu:{guestId} @ ow:{ownerId} # {selectedTab}
+            </span>
 
-            {/* 궁금해요 끝 */}
+            {guestId == ownerId && (
+              <>
+                <p>좋아요: {ownerProfileData.likesCnt}</p>
+                <p>답변 작성 수: {ownerProfileData.answerCnt}</p>
+              </>
+            )}
+          </>
 
-            <Tabs defaultValue="receive" className="mt-8">
-              <TabsList className="w-full">
-                <TabsTrigger value="receive" className="w-full">
-                  받은 질문
-                </TabsTrigger>
+          <Tabs defaultValue="receive" className="mt-8" onValueChange={handleOnTabChange}>
+            <TabsList className="w-full">
+              <TabsTrigger value="receive" className="w-full">
+                받은 질문
+              </TabsTrigger>
+              {ownerId === guestId && (
                 <TabsTrigger value="send" className="w-full">
                   보낸 질문
                 </TabsTrigger>
-              </TabsList>
-              <TabsContent value="receive">
+              )}
+            </TabsList>
+            <TabsContent value="receive">
+              <div className="py-10">
+                <Timeline conversations={conversations} />
+                <div ref={targetRefByRecv}>---</div>
+              </div>
+            </TabsContent>
+            {ownerId === guestId && (
+              <TabsContent value="send">
                 <div className="py-10">
                   <Timeline conversations={conversations} />
-                <div ref={targetRef}></div>
-
-                  {/* 
-              {[].length == 0 && <h2>작성된 질문이 없습니다.</h2>}
-              {[1].map((item, index) => {
-                return (
-                  <div key={index}>
-                    {[].map((item) => {
-                      return (
-                        <React.Fragment key={item}>
-                          <div className="flex flex-row justify-between">
-                            <div className="flex flex-row items-center space-x-2">
-                              <Avatar className="w-[36px] h-[36px]">
-                                
-                                <AvatarImage
-                                  src={profileData?.avatarPath}
-                                  alt="profile"
-                                />
-                                <AvatarFallback>
-                                  <div>
-                                    <Image
-                                      className="rounded-full bg-gradient-to-tl to-orange-200 from-stone-100 border-0 border-white p-1"
-                                      src="/assets/no-user.png"
-                                      alt="profile"
-                                      width={84}
-                                      height={84}
-                                    />
-                                  </div>
-                                </AvatarFallback>
-                              </Avatar>
-                              <b className="text-base font-semibold">익명이 </b>
-                              <span className="text-sm font-medium text-muted">
-                                30일전
-                              </span>
-                            </div>
-
-                            <div className="relative">
-                              <Button
-                                variant={'outline'}
-                                size={'icon'}
-                                className="border-0"
-                              >
-                                <MoreIcon width={24} height={24} />
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="relative ">
-                 
-                            <div className="flex flex-row w-full space-x-2">
-                              <div className="w-[36px] flex flex-col items-center mt-0 flex-shrink-0">
-                                <span className="w-[0.5px] h-full bg-white my-2">
-                                  {' '}
-                                </span>
-                              </div>
-
-                              <div className="w-full pb-4">
-                                <div className="flex flex-col">
-                                  <p className="pt-2 pr-2 text-base break-all text-wrap">
-                                    Lorem ipsum dolor sit, amet consectetur
-                                    adipisicing elit. Consectetur ullam repellat
-                                    placeat maxime aperiam asperiores, veritatis
-                                    animi iusto laudantium culpa ipsam pariatur,
-                                    omnis autem iste iure quia accusantium
-                                    reiciendis cupiditate?
-                                  </p>
-                                  <div className="flex flex-row items-center -ml-3 space-x-4 text-sm ">
-                                    <Button
-                                      className="flex justify-start text-white"
-                                      variant={'link'}
-                                      size={'sm'}
-                                    >
-                                      <HeartIcon width={16} height={16} />
-                                      <label className="">5</label>
-                                    </Button>
-                                    <Button
-                                      className="text-white rounded-full"
-                                      variant={'link'}
-                                    >
-                                      {' '}
-                                      <CommentIcon width={16} height={16} />
-                                    </Button>
-                                    <Button
-                                      className="text-white rounded-full "
-                                      variant={'link'}
-                                    >
-                                      <ShareIcon width={16} height={16} />
-                                    </Button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                          </div>
-                        </React.Fragment>
-                      )
-                    })}
-                  </div>
-                )
-              })}
-                */}
+                  <div ref={targetRefBySend}>====</div>
                 </div>
               </TabsContent>
-              <TabsContent value="send">Change your password here.</TabsContent>
-            </Tabs>
-          </div>
-        </div>
+            )}
+          </Tabs>
+          {/* </div>
+        </div> */}
+        </ContentLayout>
       </SpaceContext.Provider>
     </>
   )

@@ -1,6 +1,6 @@
 // notificationStore.ts
 'use client'
-import create from 'zustand'
+import { create } from'zustand'
 import { persist } from 'zustand/middleware'
 
 type NotificationType = {
@@ -52,7 +52,7 @@ const useNotificationStore = create<NotificationStore>()(
     }),
     {
       name: 'notification-storage',
-      getStorage: () => sessionStorage,
+      getStorage: () => sessionStorage
     },
   ),
 )

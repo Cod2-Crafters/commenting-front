@@ -23,31 +23,19 @@ import { z } from 'zod'
 import CommentIcon from '/public/assets/comment.svg'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 
-interface AnswerWriteDialogProps {
-  questionMstId?: number // write
+interface AnswerModifyDialogProps {
   modifyConId?: number // modify
   label: string
   children?: ReactNode
 }
 
-const AnswerWriteDialog = ({ questionMstId, modifyConId, label }: AnswerWriteDialogProps) => {
+const AnswerWriteDialog = ({ modifyConId, label }: AnswerModifyDialogProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [questionConversation, setQuestionConverstaion] = useState<ConversationSchemaState>()
   const { spaceOwnerId, showerGuestId, writeMaxMstId } = useSpaceContext()
 
 
   const dispatch: AppDispatch = useDispatch()
-
-  // 질문 작성 다이얼로그에서 질문 표시하는 api 호출
-  useEffect(() => {
-      async function fetchQuestionConversations() {
-        const response = await axiosClient.get<APIResponseMsg<ConversationSchemaState[]>>(`/api/conversations/details/${questionMstId}`)
-        setQuestionConverstaion(response.data.data.find((question) => question.isQuestion == true))
-      }
-      if (questionMstId && isOpen) {
-        fetchQuestionConversations()
-      }
-    }, [questionMstId])
 
 
     useEffect(() => {
@@ -73,7 +61,6 @@ const AnswerWriteDialog = ({ questionMstId, modifyConId, label }: AnswerWriteDia
       guestId: Number(showerGuestId),
       ownerId: Number(spaceOwnerId),
       content: '',
-      maxMstId: Number(writeMaxMstId),
     },
   })
 
@@ -83,17 +70,17 @@ const AnswerWriteDialog = ({ questionMstId, modifyConId, label }: AnswerWriteDia
   async function onSubmit(values: z.infer<typeof ConversationQuestionWriteSchema>) {
     // 작성 완료
    
-    alert('answer write success' + JSON.stringify(values) + '@' + writeMaxMstId)
-    if (questionMstId === 0) {
-      // 질문 작성
-      values.maxMstId = writeMaxMstId
-      dispatch(createQuestion(values))
-    } else {
-      // 답변 작성
-      alert('답변작성');
-    values.maxMstId = questionMstId
-      dispatch(createAnswer(values))
-    }
+    // alert('answer write success' + JSON.stringify(values) + '@' + conversationsMaxMasterId)
+    // if (questionMstId === 0) {
+    //   // 질문 작성
+    //   values.mstId = conversationsMaxMasterId
+    //   dispatch(createQuestion(values))
+    // } else {
+    //   // 답변 작성
+    //   alert('답변작성');
+    //   values.mstId = questionMstId
+    //   dispatch(createAnswer(values))
+    // }
 
     // const response = await axiosClient.post<APIResponseMsg<number | string>>(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/conversations/question`, {...values, mstId: conversationsMaxMasterId})
 
@@ -125,7 +112,7 @@ const AnswerWriteDialog = ({ questionMstId, modifyConId, label }: AnswerWriteDia
         <DialogContent className="w-[600px] min-h-[100px] p-4" aria-describedby={undefined}>
           <Form {...conversationQuestionWriteForm}>
             <form onSubmit={conversationQuestionWriteForm.handleSubmit(onSubmit)}>
-              {}
+              
               <div className="w-full -mt-2 text-right py-2 min-h-8">
                 <Button type="submit" variant={'primary'} size={'lg'} className="text-right">
                   저장
@@ -144,7 +131,7 @@ const AnswerWriteDialog = ({ questionMstId, modifyConId, label }: AnswerWriteDia
                 <ScrollArea className="p-4">
                   <div className="flex flex-col space-y-4 max-h-[420px]">
                     {/* items */}
-                    {questionMstId != 0 && questionConversation && (
+                    {questionConversation && (
                       <div>
                         <div className="flex flex-row items-center space-x-2">
                           {/* <span className="rounded-full">
@@ -186,13 +173,6 @@ const AnswerWriteDialog = ({ questionMstId, modifyConId, label }: AnswerWriteDia
                           </AvatarFallback>
                         </Avatar>
 
-                        {/* <Image
-                      className="rounded-full"
-                      src="/assets/no-user.png"
-                      alt="user"
-                      width={50}
-                      height={50}
-                    ></Image> */}
                         <b>익명이</b>
                       </div>
                       <div className="relative my-4">

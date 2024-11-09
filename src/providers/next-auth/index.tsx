@@ -9,7 +9,7 @@ interface Props {
   children: React.ReactNode
 }
 
-const AuthProvider = ({ children, token }: Props) => {
+const AuthProvider = ({ children }: Props) => {
   return (
     <Provider store={store}>
       <>{children}</>

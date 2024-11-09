@@ -12,6 +12,12 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getImageUrl(fileName?: string) {
+  if (!fileName) return null;
+  if (fileName.includes(process.env.NEXT_PUBLIC_SERVER_URL) ) return fileName;
+  return process.env.NEXT_PUBLIC_SERVER_URL + `/api/profile/file/${fileName}`
+}
+
+export function getNickname(nickname?: string) {
   // if (!fullUrl) return ''
 
   // const slahIndex = fullUrl.lastIndexOf('/') + 1
@@ -19,8 +25,8 @@ export function getImageUrl(fileName?: string) {
 
   // return process.env.NEXT_PUBLIC_SERVER_URL + `/api/profile/file/${fileName}`
 
-  if (!fileName) return null;
-  return process.env.NEXT_PUBLIC_SERVER_URL + `/api/profile/file/${fileName}`
+  if (!nickname) return '익명사용자'
+  return nickname
 }
 
 export function convertRecursiveNullToEmptyString(obj: any) {
@@ -66,3 +72,6 @@ export function getTimeDiffText(timeToCompare: Date): string {
     return ''
   }
 }
+
+
+export const isEmpty = (obj) => JSON.stringify(obj) === '{}';

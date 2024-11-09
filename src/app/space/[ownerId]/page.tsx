@@ -1,61 +1,46 @@
 'use server'
 import axiosServer from '@/axios-server.config'
 import { getSession } from '@/lib/login'
-import { getImageUrl } from '@/lib/utils'
 import { ProfileResponseState } from '@/schemas'
 import SpaceForm from '../space-form'
+import { redirect } from 'next/navigation'
+import { getImageUrl } from '@/lib/utils'
 
 const SpacePage = async ({ params }: { params: { ownerId: number } }) => {
-  const session = await getSession()
-  // if (!session) {
-  //   console.log('no session-redirect')
-  //   redirect('/auth/login')
-  // }
-
-  // let ownerId = 0
-  // if (!Number.isNaN(params.ownerId)) {
-  //   ownerId = session.user.id
-  //   console.log('space connect - session.user.id')
-  // } else {
-  //   ownerId = params.ownerId
-  //   console.log('space connect - params ownerId')
-  // }
-
   // 조회대상자(ownerId)가 정보를 보는 사람(geustId)와 다른 경우 -> 댓글 작성 권한 허용
   // 조회대상자(ownerId)가 정보를 보는 사람(geustId)과 동일한 경우 -> 내 스페이스로 입장한 것과 동일, 댓글 작성 권한 X
 
-  const loadProfileData = async () => {
+  // 로그인을 하지 않은 경우 로그인으로 redirect (임시조치)
+
+  const session = await getSession()
+
+  if (!session) {
+    redirect('/auth/login')
+    return
+  }
+
+  const loadProfileData = async (userId: number) => {
     //session.user.id
     try {
-      const response = await axiosServer.get<ProfileResponseState>(
-        `/api/profile/${params.ownerId}`,
-      )
+      const response = await axiosServer.get<ProfileResponseState>(`/api/profile/${userId}`)
       return response
     } catch (error) {
-      console.log('loadProfileData Response error', error)
+      // alert('loadProfileData error')
     }
 
     return null
   }
 
-  const responseProfileData = (await loadProfileData())?.data
+  const ownerId = Number(params.ownerId) || 0
+  const guestId = Number(session.user.userid) || 0;
 
-  if (responseProfileData?.data.avatarPath) {
-    responseProfileData.data.avatarPath = getImageUrl(
-      responseProfileData.data.avatarPath,
-    )
-  }
+  const ownerProfileData = (await loadProfileData(ownerId))?.data
+  const guestProfileData = (await loadProfileData(guestId))?.data
 
   return (
     <div>
       {/* data key in data key -> get response value data */}
-      {responseProfileData && (
-        <SpaceForm
-          ownerId={params.ownerId}
-          guestId={session.user.id}
-          profileData={responseProfileData.data}
-        />
-      )}
+      {ownerProfileData && <SpaceForm ownerId={ownerId} guestId={guestId} ownerProfileData={ownerProfileData.data} guestProfileData={guestProfileData.data} />}
     </div>
   )
 }

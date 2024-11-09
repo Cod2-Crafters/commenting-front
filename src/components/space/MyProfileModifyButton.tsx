@@ -1,5 +1,6 @@
 import { ProfileSchemaState } from '@/schemas'
 import MyProfileInfoDialog from '../common/MyProfileInfoDialog'
+import { useState } from 'react'
 
 interface MyProfileModifyButtonProps {
   label: string
@@ -7,7 +8,16 @@ interface MyProfileModifyButtonProps {
 }
 
 const MyProfileModifyButton = ({ label, data }: MyProfileModifyButtonProps) => {
-  return <MyProfileInfoDialog label={label} loadProfileData={data} />
+
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  return (
+    <>
+    <MyProfileInfoDialog label={label} loadedProfileData={data} isOpen={isOpen} setIsOpen={setIsOpen} />
+    <p>openstatus:{isOpen.toString()}</p>
+    </>
+ 
+  )
 }
 
 export default MyProfileModifyButton

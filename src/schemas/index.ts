@@ -39,16 +39,24 @@ export const ProfileSchema = z.object({
   nickname: z
     .string({
       message: '닉네임을 입력하세요!',
-    })  
+    })
     .min(1, { message: '닉네임을 입력하세요!' }),
   introduce: z.string().optional().nullish(),
   link1: z.string().optional().nullish(),
   link2: z.string().optional().nullish(),
   link3: z.string().optional().nullish(),
   avatarPath: z.string().optional().nullish(),
-  answerCnt: z.number().optional(),
-  likesCnt: z.number().optional(),
+  answerCnt: z.number().optional().nullish(),
+  likesCnt: z.number().optional().nullish(),
 })
+
+
+export interface LoginResponse {
+  id: string;
+  email: string;
+  token: string;
+  avatarPath: string | null 
+}
 
 //======================================== profile ========================================//
 export type ProfileSchemaState = z.infer<typeof ProfileSchema>
@@ -78,11 +86,14 @@ export const ConversationSchema = z.object({
   avatarPath: z.string(),
   isGood: z.boolean(),
   isPrivate: z.boolean(),
+  isThanked: z.boolean(),
   guestId: z.number(),
   conId: z.number(),
   isQuestion: z.boolean(),
   mstId: z.number(),
   modifiedAt: z.date(),
+  nickname: z.string().nullish(),
+  writerId: z.number()
 })
 
 export type ConversationSchemaState = z.infer<typeof ConversationSchema>
@@ -93,31 +104,53 @@ export interface PagerConversationsState {
 
 //======================================== timeline, conversations end ========================================//
 
-//======================================== conversations question write (create) ========================================//
+//======================================== conversations question write/modify (create) ========================================//
 export const ConversationQuestionWriteSchema = z.object({
   content: z.string().min(2, { message: '2글자 이상 입력하세요' }),
   ownerId: z.number(),
   guestId: z.number(),
-  mstId: z.number().optional().default(0),
+  maxMstId: z.number().default(0),
+  isPrivate: z.boolean().default(false),
+  
 })
 
+export const ConversationQuestionModifySchema = z.object({
+  conId: z.number(),
+  content: z.string().min(2, { message: '2글자 이상 입력하세요' }),
+  isQuestion: z.boolean(),
+  isPrivate: z.boolean().default(false),
+})
+
+export type ConversationQuestionModifySchemaState = z.infer<typeof ConversationQuestionModifySchema>
 export type ConversationQuestionWriteSchemaState = z.infer<typeof ConversationQuestionWriteSchema>
 
 //======================================== conversations question write (create) end ========================================//
-
 
 //======================================== conversations answer write (create) ========================================//
 export const ConversationAnswerWriteSchema = z.object({
   content: z.string().min(2, { message: '2글자 이상 입력하세요' }),
   ownerId: z.number(),
   guestId: z.number(),
-  maxMstId: z.number().optional().default(0),
+  mstId: z.number().default(0),
 })
 
-export type ConversationAnswerWriteSchemaState = z.infer<typeof ConversationQuestionWriteSchema>
+export type ConversationAnswerWriteSchemaState = z.infer<typeof ConversationAnswerWriteSchema>
 
 //======================================== conversations answer write (create) end ========================================//
 
+//======================================== conversations answer modify ========================================//
+export const ConversationAnswerModifySchema = z.object({
+  ownerId: z.number(),
+  guestId: z.number(),
+  content: z.string().min(2, { message: '2글자 이상 입력하세요' }),
+  conId: z.number(),
+  isQuestion: z.boolean(),
+  isPrivate: z.boolean().default(false),
+})
+
+export type ConversationAnswerModifySchemaState = z.infer<typeof ConversationAnswerModifySchema>
+
+//======================================== conversations answer modify end ========================================//
 
 export interface ConversationQuestionLikeItResponse {
   success: boolean
@@ -125,14 +158,43 @@ export interface ConversationQuestionLikeItResponse {
   conId?: number
 }
 
-//======================================== question heart (like question) ========================================//
+export type ConversationQuestionThankedSchemaResponse = ConversationQuestionLikeItResponse
+
+//======================================== answer heart (like question) ========================================//
 
 export const ConversationQuestionLikeItSchema = z.object({
-conId: z.number(),
-userId: z.number(),
+  conId: z.number(),
+  userId: z.number()
 })
-
 
 export type ConversationQuestionLikeItSchemaState = z.infer<typeof ConversationQuestionLikeItSchema>
 
-//======================================== question heart (like question) end ========================================//
+//======================================== answer heart (like question) end ========================================//
+
+//======================================== question thanked ========================================//
+
+export type ConversationQuestionThankedSchemaState = ConversationQuestionLikeItSchemaState
+
+//======================================== question thanked end ========================================//
+
+export function isConversationSchemaState(arg: any): arg is ConversationSchemaState {
+  return arg !== undefined
+}
+
+
+
+//======================================== likeit questions start ========================================//
+
+export interface LikesQuestionItem {
+  createAt: Date;
+  content: string;
+  ownerNickName: string;
+  guestNickname: string;
+  mstId: number;
+  guestId: number;
+  ownerId: number;
+}
+//export type LikesQuestionItem = Omit<ConversationSchemaState, 'avatarPath' | 'isPrivate' | 'modifiedAt'> & {email: string}
+
+//======================================== likeit questions end ========================================//
+
