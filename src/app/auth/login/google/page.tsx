@@ -1,21 +1,17 @@
 "use client";
 import { useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import axios from 'axios';
-import axiosClient from '@/axios.config';
-import { useDispatch } from 'react-redux';
-import { setCredentials } from '../../authSlice';
+import { useSearchParams } from 'next/navigation';
 
 const GoogleLogin = () => {
   const searchParams = useSearchParams();
-  const code = searchParams.get('code');
-  const executed = useRef(false);
-  const dispatch = useDispatch();
+  const code = searchParams.get('code'); // 구글에서 받은 인증 코드
+  const executed = useRef(false); // 무한 반복 방지 플래그
 
   useEffect(() => {
     const fetchToken = async () => {
       if (code && !executed.current) {
-        executed.current = true;
+        executed.current = true; // 플래그 설정으로 한 번만 실행되도록 함
+
         try {
           const params = new URLSearchParams();
           params.append('code', code);
@@ -26,65 +22,50 @@ const GoogleLogin = () => {
 
           const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: params.toString()
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString(),
           });
 
           const tokenData = await tokenResponse.json();
-          console.log(tokenData);
           if (tokenData.access_token) {
             const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
               method: 'GET',
               headers: {
-                'Authorization': `Bearer ${tokenData.access_token}`
-              }
+                Authorization: `Bearer ${tokenData.access_token}`,
+              },
             });
 
             const userData = await userResponse.json();
             console.log(userData);
-
             if (userData) {
-              const login = await fetch(process.env.NEXT_PUBLIC_SERVER_URL + '/api/member/sign-in', {
-                method: "POST",
+              const login = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/member/sign-in`, {
+                method: 'POST',
                 headers: {
-                  "Content-Type": "application/json"
+                  'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                   email: userData.email,
-                  provider: "GOOGLE"
-                })
+                  provider: 'GOOGLE',
+                }),
               });
 
               const loginData = await login.json();
-              if (loginData) {
-                // dispatch(
-                //   setCredentials({
-                //     user: { email: loginData.data.email },
-                //     token: loginData.data.token,
-                //     // id : loginData.data.id
-                //   }),
-                // )
-                window.opener.postMessage({ type: 'LOGIN_SUCCESS', token: loginData.data.token, email: loginData.data.email, id: loginData.data.id }, 'http://localhost:3000');
+              if (loginData && loginData.data) {
+                // 부모 창으로 메시지 전달
+                window.opener.postMessage({
+                  token: loginData.data.token,
+                  email: loginData.data.email,
+                  userId: loginData.data.userId,
+                }, window.location.origin);
 
+                window.close(); // 팝업 창 닫기
               }
-
-              // 로그인 성공 시 부모 창으로 메시지 전달
-              // window.opener.postMessage({ type: 'LOGIN_SUCCESS', data: loginData }, '*');
-
-
-              // 현재 창 닫기
-              window.close();
             }
           } else {
-            console.error(tokenData);
+            console.error('Failed to fetch access token', tokenData);
           }
         } catch (error) {
-          console.error(error);
-
-          window.opener.postMessage({ type: 'LOGIN_FAILURE', error }, '*');
-          window.close();
+          console.error('Error during token exchange:', error);
         }
       }
     };
@@ -92,6 +73,7 @@ const GoogleLogin = () => {
     fetchToken();
   }, [code]);
 
+  return null; // 렌더링할 내용이 없음
 };
 
 export default GoogleLogin;

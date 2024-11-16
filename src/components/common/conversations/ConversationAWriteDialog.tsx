@@ -20,11 +20,13 @@ interface ConversationAWriteDialogProps {
   isOpen: boolean
   trigger?: ReactNode
   mstId: number
+  onSubmitT?: () => void; // 작성 완료 후 호출될 콜백
+
 }
 
 // 비어 있는 상황에서 질문 작성하기
 
-const ConversationAWriteDialog = ({ setIsOpen, isOpen, trigger, mstId }: ConversationAWriteDialogProps) => {
+const ConversationAWriteDialog = ({ setIsOpen, isOpen, trigger, mstId, onSubmitT }: ConversationAWriteDialogProps) => {
   let { showerGuestId, spaceOwnerId, writeMaxMstId, guestProfileData } = useSpaceContext()
 
   // if (!showerGuestId) {
@@ -50,9 +52,18 @@ const ConversationAWriteDialog = ({ setIsOpen, isOpen, trigger, mstId }: Convers
   // 서브밋 핸들링
   const onSubmit = async (values: ConversationQuestionWriteSchemaState) => {
     dispatch(createAnswer({ ...values, mstId: mstId }))
-    alert('answer submit: ' +  JSON.stringify({ ...values, mstId: mstId }))
+    alert('answer submit: ' + JSON.stringify({ ...values, mstId: mstId }))
     setIsOpen(false)
   }
+
+  const handleSubmit = async (values: ConversationQuestionWriteSchemaState) => {
+    dispatch(createAnswer({ ...values, mstId }));
+    alert('작성 완료!');
+    if (onSubmitT) {
+      onSubmitT(); // 작성 완료 후 부모 콜백 호출
+    }
+    setIsOpen(false); // 다이얼로그 닫기
+  };
 
   // 서브밋 오류 핸들링
   const onInvalid = (errors) => {
@@ -67,7 +78,7 @@ const ConversationAWriteDialog = ({ setIsOpen, isOpen, trigger, mstId }: Convers
     <ConversationQuestionDialog isOpen={isOpen} setIsOpen={setIsOpen} trigger={trigger}>
       {isOpen === true && (
         <Form {...writeForm}>
-          <form onSubmit={writeForm.handleSubmit(onSubmit, onInvalid)}>
+          <form onSubmit={onSubmitT ? writeForm.handleSubmit(handleSubmit) : writeForm.handleSubmit(onSubmit, onInvalid)}>
             <>
               <ConversationQuestionDialog.Header>
                 <Button type="submit" variant={'primary'} size={'lg'} className="text-right">

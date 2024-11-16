@@ -28,19 +28,68 @@ export const initSSE = (token: string) => {
       retryCount = 0
     }
 
+    // const handleEvent = (event: MessageEvent) => {
+    //   console.log('New message received:', event)
+    //   try {
+    //     // 메시지가 JSON 형식인지 확인
+    //     if (event.data && typeof event.data === 'string' && event.data.startsWith('{')) {
+    //       const data = JSON.parse(event.data)
+    //       const { addNotification } = useNotificationStore.getState()
+    //       addNotification(data.message)
+    //     } else {
+    //       console.warn('Received non-JSON message:', event.data)
+    //     }
+    //   } catch (error) {
+    //     console.error('Error parsing message:', error)
+    //   }
+    // }
     const handleEvent = (event: MessageEvent) => {
       console.log('New message received:', event)
+      // try {
+      //   if (event.data && typeof event.data === 'string') {
+      //     const lines = event.data.split('\n')
+      //     const lastLine = lines[lines.length - 1]
+
+      //     const unreadNotifications = parseInt(lastLine, 10)
+      //     if (!isNaN(unreadNotifications)) {
+      //       const { setUnreadCount } = useNotificationStore.getState()
+      //       setUnreadCount(unreadNotifications)
+      //     } else {
+      //       const data = JSON.parse(event.data)
+      //       const { addNotification } = useNotificationStore.getState()
+      //       addNotification(data.message)
+      //     }
+      //   } else {
+      //     console.warn('Received non-JSON message:', event.data)
+      //   }
+      // } catch (error) {
+      //   console.error('Error parsing message:', error)
+      // }
+      console.log('새 메시지 수신:', event)
       try {
-        // 메시지가 JSON 형식인지 확인
-        if (event.data && typeof event.data === 'string' && event.data.startsWith('{')) {
-          const data = JSON.parse(event.data)
-          const { addNotification } = useNotificationStore.getState()
-          addNotification(data.message)
+        if (event.data && typeof event.data === 'string') {
+          const lines = event.data.split('\n')
+          lines.forEach((line) => {
+            if (line.startsWith('{')) {
+              const data = JSON.parse(line)
+              if ('unreadCount' in data) {
+                const { setUnreadCount } = useNotificationStore.getState()
+                setUnreadCount(data.unreadCount)
+              } else if ('message' in data) {
+                const { addNotification } = useNotificationStore.getState()
+                addNotification(data.message)
+              }
+            } else if (line.includes('EventStream Created')) {
+              console.log('이벤트 스트림이 생성되었습니다:', line)
+            } else {
+              console.warn('처리할 수 없는 메시지:', line)
+            }
+          })
         } else {
-          console.warn('Received non-JSON message:', event.data)
+          console.warn('유효하지 않은 메시지 형식:', event.data)
         }
       } catch (error) {
-        console.error('Error parsing message:', error)
+        console.error('메시지 파싱 오류:', error)
       }
     }
 

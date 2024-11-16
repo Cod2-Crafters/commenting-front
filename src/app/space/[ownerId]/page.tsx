@@ -13,7 +13,6 @@ const SpacePage = async ({ params }: { params: { ownerId: number } }) => {
   // 로그인을 하지 않은 경우 로그인으로 redirect (임시조치)
 
   const session = await getSession()
-
   if (!session) {
     redirect('/auth/login')
     return
@@ -30,9 +29,8 @@ const SpacePage = async ({ params }: { params: { ownerId: number } }) => {
 
     return null
   }
-
   const ownerId = Number(params.ownerId) || 0
-  const guestId = Number(session.user.userid) || 0;
+  const guestId = Number(session.user.userId) || 0;
 
   const ownerProfileData = (await loadProfileData(ownerId))?.data
   const guestProfileData = (await loadProfileData(guestId))?.data
