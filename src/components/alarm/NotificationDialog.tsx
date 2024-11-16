@@ -12,7 +12,7 @@ import MoreIcon from '/public/assets/more.svg';
 import HeartIcon from '/public/assets/heart.svg';
 import HeartFillIcon from '/public/assets/heart-fill.svg';
 import ShareIcon from '/public/assets/share.svg';
-import AnswerWriteButton from '../space/ConversationQuestionWriteButton'
+// import AnswerWriteButton from '../space/ConversationQuestionWriteButton'
 import { deleteQuestion, toggleQuestionLikeIt } from '@/app/space/conversationSlice';
 import { AppDispatch } from '@/store';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -106,7 +106,7 @@ const NotificationDialog = ({ isOpen, setIsOpen, mstId, showerGuestId }) => {
                                             </Button>
                                             {conversation.isQuestion && (
                                                 <>
-                                                    <AnswerWriteButton label='' questionMstId={conversation.mstId} onAnswerSubmit={handleAnswerSubmit} />
+                                                    {/* <AnswerWriteButton label='' questionMstId={conversation.mstId} onAnswerSubmit={handleAnswerSubmit} /> */}
                                                     <Button className="text-white rounded-full" variant={'link'}>
                                                         <ShareIcon width={16} height={16} />
                                                     </Button>

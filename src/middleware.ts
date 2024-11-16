@@ -6,6 +6,7 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
   const { pathname } = request.nextUrl
   console.log('middleware pathname', pathname);
   const allCookies = cookies().getAll()
+  
   console.log('전체 req 쿠키: --- start\n', allCookies, "\n------ end")
 
   // 로그인 페이지 또는 로그인 처리 페이지는 리디렉션 예외로 설정
@@ -27,6 +28,6 @@ export async function middleware(request: NextRequest, event: NextFetchEvent) {
 export const config = {
   matcher: [
     // '/((?!api|_next|static|favicon.ico).*)',
-    "/((?!_next/static|_next/image||public/*|favicon.ico|robots.txt|sitemap.xml|manifest.json).*)",
+    "/((?!api|_next/static|_next/image|public/*|favicon.ico|robots.txt|sitemap.xml|manifest.json).*)",
   ],
 }

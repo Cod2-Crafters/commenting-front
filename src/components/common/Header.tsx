@@ -128,6 +128,14 @@ const Header = (props: HeaderProps) => {
                   </div>
 
                   <div className="text-white text-nowrap">
+                    <Link href={'/statistic'}>
+                      <Button variant={null} className="hover:bg-surface rounded-md block p-2 transition-colors text-left w-full" onClick={handleOnMenuClick}>
+                        통계
+                      </Button>
+                    </Link>
+                  </div>
+
+                  <div className="text-white text-nowrap">
                     {token ? (
                       <Button
                         variant={null}

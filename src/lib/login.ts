@@ -44,7 +44,7 @@ export async function login(formData: FormData) {
     },
   }
   const sessionValue = await encrypt(tokenPayload)
-  cookies().set('session', sessionValue, { expires: sessionExpireDate, httpOnly: true })
+  cookies().set('session', sessionValue, { expires: sessionExpireDate, httpOnly: true, secure: true })
 }
 
 
