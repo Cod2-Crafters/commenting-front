@@ -175,8 +175,11 @@ export async function logout() {
 export async function getSession() {
   'use server'
   const session = cookies().get('session')?.value
+  // console.log('getSession() - session_check', session)
   if (!session) return null
-  return await decrypt(session)
+
+  const tokenPayload = await decrypt(session)
+  return tokenPayload
 }
 
 // export async function updateSession(request: NextRequest) {
