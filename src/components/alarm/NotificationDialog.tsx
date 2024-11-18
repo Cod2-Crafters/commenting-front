@@ -12,10 +12,10 @@ import MoreIcon from '/public/assets/more.svg';
 import HeartIcon from '/public/assets/heart.svg';
 import HeartFillIcon from '/public/assets/heart-fill.svg';
 import ShareIcon from '/public/assets/share.svg';
-// import AnswerWriteButton from '../space/ConversationQuestionWriteButton'
 import { deleteQuestion, toggleQuestionLikeIt } from '@/app/space/conversationSlice';
 import { AppDispatch } from '@/store';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import AnswerWriteModifyButton from '../space/AnswerWriteModifyButton';
 
 
 
@@ -25,9 +25,19 @@ const fetchConversationDetails = async (mstId) => {
     return response.data.data;
 };
 
+const toggleLikeStatus = async (token: string, { conId, userId }: { conId: number; userId: number }) => {
+    const response = await axiosClient.post('/api/recommends/likes', {
+        conId,
+        userId,
+    }, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+};
 
-
-const NotificationDialog = ({ isOpen, setIsOpen, mstId, showerGuestId }) => {
+const NotificationDialog = ({ isOpen, setIsOpen, mstId, showerGuestId, token }) => {
     const dispatch: AppDispatch = useDispatch();
 
     const queryClient = useQueryClient();
@@ -39,19 +49,45 @@ const NotificationDialog = ({ isOpen, setIsOpen, mstId, showerGuestId }) => {
         staleTime: 0,
     });
 
+
+    // 좋아요 Mutation 설정
+    const likeMutation = useMutation({
+        mutationFn: ({ conId }: { conId: number }) => toggleLikeStatus(token, { conId, userId: showerGuestId }),
+        onSuccess: () => {
+            // 쿼리 무효화로 데이터를 최신 상태로 갱신
+            queryClient.invalidateQueries({ queryKey: ['conversationDetails', mstId] });
+        },
+        onError: (error) => {
+            console.error('좋아요 처리 중 오류 발생:', error);
+        },
+    });
+
+
     useEffect(() => {
         if (isOpen && mstId) {
             refetch();
         }
     }, [isOpen, mstId, refetch]);
 
+    const handleLikeClick = (conId: number) => {
+        likeMutation.mutate({ conId });
+    };
+
+
+    // const handleAnswerSubmit = async () => {
+    //     // setIsLoading(true);
+    //     setTimeout(async () => {
+    //         await queryClient.invalidateQueries({ queryKey: ['conversationDetails', mstId] });
+    //         // setIsLoading(false);
+    //     }, 1000)
+    // }
     const handleAnswerSubmit = async () => {
-        // setIsLoading(true);
-        setTimeout(async () => {
-            await queryClient.invalidateQueries({ queryKey: ['conversationDetails', mstId] });
-            // setIsLoading(false);
-        }, 1000)
-    }
+        // 즉시 refetch 호출
+        await refetch();
+
+        // 또는 invalidateQueries로 쿼리 무효화
+        queryClient.invalidateQueries({ queryKey: ['conversationDetails', mstId] });
+    };
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="w-[800px] h-[500px] p-8">
@@ -101,12 +137,22 @@ const NotificationDialog = ({ isOpen, setIsOpen, mstId, showerGuestId }) => {
                                     <div>
                                         <p className="text-base break-all text-wrap">{conversation.content}</p>
                                         <div className="flex items-center space-x-4 mt-2">
-                                            <Button className="flex justify-start text-red" variant={'link'} size={'sm'} onClick={() => dispatch(toggleQuestionLikeIt({ conId: conversation.conId, userId: showerGuestId }))}>
-                                                {showerGuestId !== 0 && conversation.isGood ? <HeartFillIcon width={16} height={16} /> : <HeartIcon width={16} height={16} />}
+                                            <Button
+                                                className="flex justify-start text-red"
+                                                variant="link"
+                                                size="sm"
+                                                onClick={() => handleLikeClick(conversation.conId)}
+                                            >
+                                                {showerGuestId !== 0 && conversation.isGood ? (
+                                                    <HeartFillIcon width={16} height={16} />
+                                                ) : (
+                                                    <HeartIcon width={16} height={16} />
+                                                )}
                                             </Button>
                                             {conversation.isQuestion && (
                                                 <>
-                                                    {/* <AnswerWriteButton label='' questionMstId={conversation.mstId} onAnswerSubmit={handleAnswerSubmit} /> */}
+                                                    <AnswerWriteModifyButton mstId={conversation.mstId} type={'write'} onSubmit={handleAnswerSubmit} />
+
                                                     <Button className="text-white rounded-full" variant={'link'}>
                                                         <ShareIcon width={16} height={16} />
                                                     </Button>

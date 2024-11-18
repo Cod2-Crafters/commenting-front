@@ -12,18 +12,21 @@ export default function NotificationManager() {
     const { setEventSource } = useNotificationStore();
 
     useEffect(() => {
-        let eventSource: EventSource | null = null;
+        if (typeof window !== 'undefined' && token) {
 
-        if (token) {
-            eventSource = initSSE(token);
-            setEventSource(eventSource);
-        }
+            let eventSource: EventSource | null = null;
 
-        return () => {
-            if (eventSource) {
-                eventSource.close();
+            if (token) {
+                eventSource = initSSE(token);
+                setEventSource(eventSource);
             }
-        };
+
+            return () => {
+                if (eventSource) {
+                    eventSource.close();
+                }
+            };
+        }
     }, [token, setEventSource]);
 
     return null;

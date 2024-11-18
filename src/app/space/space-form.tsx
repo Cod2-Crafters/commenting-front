@@ -163,8 +163,8 @@ const SpaceForm = ({ ownerId, guestId, ownerProfileData, guestProfileData }: Spa
 
             {guestId == ownerId && (
               <>
-                <p>좋아요: {ownerProfileData.likesCnt}</p>
-                <p>답변 작성 수: {ownerProfileData.answerCnt}</p>
+                <p>좋아요: {ownerProfileData?.likesCnt}</p>
+                <p>답변 작성 수: {ownerProfileData?.answerCnt}</p>
               </>
             )}
           </>

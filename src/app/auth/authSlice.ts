@@ -4,34 +4,35 @@ import { stat } from 'fs'
 import { nullable } from 'zod'
 
 interface AuthState {
-  user: {userid: string, email:string, avatarPath:string } | null;
-  token: string | null;
+  user: { email: string } | null
+  token: string | null
+  userId: number | null
 }
 
 const initialState: AuthState = {
   user: null,
   token: null,
+  userId: null,
 }
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setCredentials: (
-      state,
-      action: PayloadAction<{user : {userid: string, email:string, avatarPath:string }; token: string }>
-    ) => {
-      state.user = action.payload.user;
-      state.token = action.payload.token; 
+    setCredentials: (state, action: PayloadAction<{ user: { email: string }; token: string; userId: number }>) => {
+      state.user = action.payload.user
+      state.token = action.payload.token
+      state.userId = action.payload.userId
     },
     clearCredentials: (state) => {
       state.user = null
       state.token = null
+      state.userId = null
     },
   },
 })
 
-export const selectUserId = (state: RootState) => state.auth.user.userid
+export const selectUserId = (state: RootState) => state.auth.userId
 
 export const { setCredentials, clearCredentials } = authSlice.actions
 

@@ -11,10 +11,18 @@ interface AnswerWriteModifyButtonProps {
   type: 'write' | 'modify'
   mstId?: number // write property
   modifyConversation?: ConversationSchemaState // modify property
+  onSubmit?: () => void; // 댓글 작성 완료 후 호출될 콜백
+
 }
 
-const AnswerWriteModifyButton = ({ type = 'write', mstId, modifyConversation }: AnswerWriteModifyButtonProps) => {
+const AnswerWriteModifyButton = ({ type = 'write', mstId, modifyConversation, onSubmit }: AnswerWriteModifyButtonProps) => {
   const [isOpen, setIsOpen] = useState(false)
+  const handleOnSubmit = () => {
+    if (onSubmit) {
+      onSubmit(); // 작성 완료 후 콜백 호출
+    }
+    setIsOpen(false); // 다이얼로그 닫기
+  };
   return (
     <>
       {type === 'write' && (
@@ -27,6 +35,7 @@ const AnswerWriteModifyButton = ({ type = 'write', mstId, modifyConversation }: 
             </Button>
           }
           mstId={mstId}
+          onSubmitT={handleOnSubmit} // 작성 완료 후 처리
         />
       )}
 

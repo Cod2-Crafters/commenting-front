@@ -12,22 +12,31 @@ import { Button } from '../ui/button'
 import HamburgerIcon from '/public/assets/ham.svg'
 import { clearCredentials } from '@/app/auth/authSlice'
 import { useNotificationStore } from '@/stores/notifiicationStore'
+import { initSSE } from '@/lib/initSse'
 
-const Header = (props: HeaderProps) => {
-  const token = useSelector((state: RootState) => state.auth.token)
+const Header = ({ token: initialToken }: { token: string | null }) => {
+  // if (typeof window === "undefined") return null;
+
+  // const token = useSelector((state: RootState) => state.auth.token);
   const router = useRouter()
   const dispatch = useDispatch()
-  //const notifications = useNotificationStore((state) => state.notifications)
-  const notifications = undefined
-
-  const { clearEventSource } = useNotificationStore()
-
+  // const { notifications } = useNotificationStore();
+  const { clearEventSource, setUnreadCount } = useNotificationStore()
   const [isMenuVisible, setIsMenuVisible] = useState(false)
-  const [unreadCount, setUnreadCount] = useState(0)
+  // const [token, setToken] = useState(initialToken);
+  const token = useSelector((state: RootState) => state.auth.token)
+
+  const { unreadCount } = useNotificationStore()
+
+  // 기본값을 설정하여 서버와 클라이언트 상태를 일치
+  const [clientUnreadCount, setClientUnreadCount] = useState<number>(0)
 
   useEffect(() => {
-    setUnreadCount(notifications?.filter((notif) => !notif.isRead).length)
-  }, [notifications !== undefined])
+    setClientUnreadCount(unreadCount) // 클라이언트에서만 상태 갱신
+  }, [unreadCount])
+  useEffect(() => {
+    setIsMenuVisible(false) // 클라이언트 렌더링 시 초기화
+  }, [])
 
   const logout = () => {
     fetch('/api/logout', {
@@ -41,12 +50,12 @@ const Header = (props: HeaderProps) => {
       if (response.ok) {
         clearEventSource()
         dispatch(clearCredentials())
-        router.push('/auth/login')
+        window.location.reload()
       }
     })
   }
   const login = () => {
-    console.log('로그인 시도')
+    console.log('로그인')
     router.push('/auth/login')
     setIsMenuVisible(false)
   }
@@ -64,15 +73,14 @@ const Header = (props: HeaderProps) => {
     }
   })
 
-
   useEffect(() => {
-    if (notifications) {
-      const count = notifications.filter((notif) => !notif.isRead).length;
-      setUnreadCount(count);
+    if (!token) {
+      // 사용자가 로그아웃한 경우, unreadCount 상태를 초기화
+      setUnreadCount(0)
     }
-  }, [notifications]);
+  }, [token])
   return (
-    <header className="top-0 left-0 w-full bg-background " style={{ zIndex: 100 }}>
+    <header className=" fixed top-0 left-0 w-full bg-background " style={{ zIndex: 100 }}>
       <div className="flex max-w-[1230px] m-auto py-8 justify-between items-center px-2">
         <a href={'/'}>
           <h2 className="text-primary font-light text-2xl">
@@ -81,20 +89,22 @@ const Header = (props: HeaderProps) => {
         </a>
         <div ref={ref} className="cursor-pointer focus:text-red-300 focus:bg-red-300">
           <div className="flex items-center relative w-full">
-            <div className='relative flex flex-row'>
-              <Image src="/icons/bell.png" alt="bell" width={15} height={10} onClick={() => {
-                router.push('/notifications');
-              }} />
-              {unreadCount > 0 && <span className="absolute top-0 right-8 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-                {unreadCount}
-              </span>}
+            <div className="relative flex flex-row">
+              <img
+                src="/icons/bell.png"
+                alt="bell"
+                width={15}
+                height={10}
+                onClick={() => {
+                  router.push('/notifications')
+                }}
+              />
+              {clientUnreadCount > 0 ? <span className="absolute top-0 right-8 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">{clientUnreadCount}</span> : <></>}
             </div>
             <Button variant={'link'} onClick={handleOnMenuClick}>
               <HamburgerIcon width={25} height={11} />
             </Button>
-            <div
-              className={`absolute top-10 right-0 cursor-default ${!isMenuVisible ? 'hidden' : 'visibility'} `}
-            >
+            <div className={`absolute top-10 right-0 cursor-default ${!isMenuVisible ? 'hidden' : 'visibility'} `}>
               <div className="bg-black min-h-20 rounded-2xl py-6 px-10">
                 <div className="flex flex-col space-y-2 m-auto">
                   {/* menu items */}
@@ -108,16 +118,11 @@ const Header = (props: HeaderProps) => {
 
                   <div className="text-white text-nowrap">
                     <Link href={'/notifications'}>
-                      <Button
-                        variant={null}
-                        className="hover:bg-surface rounded-md block p-2 transition-colors text-left w-full"
-                        onClick={handleOnMenuClick}
-                      >
+                      <Button variant={null} className="hover:bg-surface rounded-md block p-2 transition-colors text-left w-full" onClick={handleOnMenuClick}>
                         알림
                       </Button>
                     </Link>
                   </div>
-
 
                   <div className="text-white text-nowrap">
                     <Link href={'/likes'}>
@@ -131,6 +136,13 @@ const Header = (props: HeaderProps) => {
                     <Link href={'/statistic'}>
                       <Button variant={null} className="hover:bg-surface rounded-md block p-2 transition-colors text-left w-full" onClick={handleOnMenuClick}>
                         통계
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="text-white text-nowrap">
+                    <Link href={'/settings'}>
+                      <Button variant={null} className="hover:bg-surface rounded-md block p-2 transition-colors text-left w-full" onClick={handleOnMenuClick}>
+                        설정
                       </Button>
                     </Link>
                   </div>

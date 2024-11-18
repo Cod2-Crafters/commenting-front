@@ -16,8 +16,8 @@ interface LikeQuestionItemProps {
 }
 
 // 클릭하면 -> 링크 팝업 표시
-  const LikeQuestionItem = ({ data, children, showDialog, loginUserId  }: LikeQuestionItemProps) => {
-  
+const LikeQuestionItem = ({ data, children, showDialog, loginUserId }: LikeQuestionItemProps) => {
+
 
   const handleLikeQuestionItemClick = async (event: MouseEvent<HTMLDivElement>) => {
     showDialog(data.mstId);
@@ -47,7 +47,7 @@ interface LikeQuestionItemProps {
           </div>
         </div>
       </div>
-    </>ㄱ
+    </>
   )
 }
 

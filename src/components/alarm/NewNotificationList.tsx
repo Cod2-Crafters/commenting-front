@@ -8,7 +8,7 @@ import Image from "next/image";
 import { Button } from "../ui/button";
 import { useNotificationStore } from "@/stores/notifiicationStore";
 import NotificationDialog from "./NotificationDialog";
-import { useState } from "react";
+import { AwaitedReactNode, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal, useState } from "react";
 
 async function getNotifications(token: string) {
     const { data } = await axiosClient.get('/api/notifications', {
@@ -28,11 +28,30 @@ async function markAllNotificationsAsRead(token: string) {
     return data;
 }
 
+async function markReadNotification(token: string, notificationId: number, mstId: number) {
+    const { data } = await axiosClient.request({
+        method: 'POST', // API가 GET을 사용한다고 가정
+        url: `/api/notifications/${notificationId}/mark-read`,
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        data: {
+            mstId: mstId,
+            isRead: false
+        }
+    });
+    return data;
+}
+
+
 function NewNotificationList({ guestId }) {
     const token = useSelector((state: RootState) => state.auth.token);
     const queryClient = useQueryClient();
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedMstId, setSelectedMstId] = useState(null);
+    const { setUnreadCount } = useNotificationStore();
+
     // const session = await getSession()
 
     const { clearNotifications, clearEventSource } = useNotificationStore();
@@ -46,15 +65,29 @@ function NewNotificationList({ guestId }) {
         mutationFn: () => markAllNotificationsAsRead(token),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notification', token] });
+            setUnreadCount(0);
             clearNotifications();
         },
     });
 
+
+    const readNotification = useMutation({
+        mutationFn: (notificationId: number) => markReadNotification(token, notificationId, selectedMstId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['notification', token] });
+            setUnreadCount((useNotificationStore.getState().unreadCount || 0) - 1);
+
+
+        },
+    });
+
+
     const notifications = data?.data;
 
-    const openDialog = (mstId: number) => {
+    const openDialog = (mstId: number, notificationId: number) => {
         console.log(mstId)
         setSelectedMstId(mstId);
+        readNotification.mutate(notificationId)
         if (!dialogOpen) setDialogOpen(true);
     }
     if (isLoading) return <div>Loading...</div>;
@@ -62,7 +95,7 @@ function NewNotificationList({ guestId }) {
 
     return (
         <div className="container mx-auto">
-            <NotificationDialog isOpen={dialogOpen} setIsOpen={setDialogOpen} mstId={selectedMstId} showerGuestId={guestId} />
+            <NotificationDialog token={token} isOpen={dialogOpen} setIsOpen={setDialogOpen} mstId={selectedMstId} showerGuestId={guestId} />
 
             <div className="bg-gray-900 text-white p-4">
                 <div className="flex justify-between items-center mb-4">
@@ -79,12 +112,12 @@ function NewNotificationList({ guestId }) {
                     <p>새로운 알림이 없습니다.</p>
                 ) : (
                     <>
-                        {notifications.map((notification) => (
+                        {notifications.map((notification: { id: Key; isRead: any; mstId: number; message: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode>; createdAt: string | number | Date; }) => (
                             <div
                                 key={notification.id}
                                 className={`flex items-center mb-4 pb-4 border-b border-gray-700 ${!notification.isRead ? 'bg-gray-800' : ''
                                     }`}
-                                onClick={() => { openDialog(notification.mstId) }}
+                                onClick={() => { openDialog(notification.mstId, Number(notification.id)) }}
                             >
                                 <div className="mr-4 text-red-500">❤️</div>
                                 <Image

@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label'
 import { LikesQuestionItem } from '@/schemas'
 import React, { useEffect } from 'react'
 import { fetchLikeQuestions } from './action'
-import { decrypt, getSession } from '@/lib/login'
+import { getSession } from '@/lib/login'
 import { SpaceContext } from '@/components/space/space-context'
 
 type Props = {}
@@ -15,11 +15,11 @@ type Props = {}
 const page = async (props: Props) => {
   const response = await fetchLikeQuestions();
   const session = await getSession();
-  
+
   return (
     <ContentLayout>
-        <Label className='text-2xl'>좋은 질문들</Label>
-        <LikeQuestionItemList questions={response?.data?.data} loginUserId={Number(session?.user?.userid) || 0}/>
+      <Label className='text-2xl'>좋은 질문들</Label>
+      <LikeQuestionItemList questions={response?.data?.data} loginUserId={Number(session?.user?.userid) || 0} />
     </ContentLayout>
   )
 }

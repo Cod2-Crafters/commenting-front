@@ -1,19 +1,34 @@
-'use client'
 import axios from 'axios'
 import https from 'https'
+import { convertRecursiveNullToEmptyString } from './lib/utils'
+import { useSelector } from 'react-redux'
+import { RootState, store } from './store'
 
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false,
 })
 
-const axiosClient = axios.create({ httpsAgent });
+const axiosClient = axios.create({})
 
 // 라이브러리에 대한 timeout 값 재정의
 // 이제 모든 요청은 시간 초과 전 2.5초 대기하는 인스턴스를 사용합니다.
 axiosClient.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_URL
-axiosClient.defaults.timeout = 6000
+axiosClient.defaults.timeout = 4000
 axiosClient.defaults.headers.common['Content-Type'] = 'application/json'
 axiosClient.defaults.httpsAgent = httpsAgent
+
+axiosClient.interceptors.request.use(
+  (config) => {
+    const token = store.getState().auth.token
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  },
+)
 
 axiosClient.interceptors.response.use(
   (response) => {
