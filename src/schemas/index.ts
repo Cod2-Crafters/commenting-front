@@ -198,3 +198,15 @@ export interface LikesQuestionItem {
 
 //======================================== likeit questions end ========================================//
 
+export interface StatisticInfo {
+  goodQuestionCount: number, // 받은 좋은 질문
+  receivedQuestionCount: number, // 받은 질문
+  sentQuestionCount: number, // 보낸 질문
+  answerCount: number, // 작성한 답변
+  unansweredQuestionCount: number, // 미답변 질문
+  answerRate: number,
+  questionedUsers: Array<{
+    avatarPath: string,
+    memberId: number
+  }>
+}
