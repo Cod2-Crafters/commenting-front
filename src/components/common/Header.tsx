@@ -15,15 +15,10 @@ import { useNotificationStore } from '@/stores/notifiicationStore'
 import { initSSE } from '@/lib/initSse'
 
 const Header = ({ token: initialToken }: { token: string | null }) => {
-  // if (typeof window === "undefined") return null;
-
-  // const token = useSelector((state: RootState) => state.auth.token);
   const router = useRouter()
   const dispatch = useDispatch()
-  // const { notifications } = useNotificationStore();
   const { clearEventSource, setUnreadCount } = useNotificationStore()
   const [isMenuVisible, setIsMenuVisible] = useState(false)
-  // const [token, setToken] = useState(initialToken);
   const token = useSelector((state: RootState) => state.auth.token)
 
   const { unreadCount } = useNotificationStore()
@@ -80,7 +75,7 @@ const Header = ({ token: initialToken }: { token: string | null }) => {
     }
   }, [token])
   return (
-    <header className=" fixed top-0 left-0 w-full bg-background " style={{ zIndex: 100 }}>
+    <header className="top-0 left-0 w-full bg-background " style={{ zIndex: 100 }}>
       <div className="flex max-w-[1230px] m-auto py-8 justify-between items-center px-2">
         <a href={'/'}>
           <h2 className="text-primary font-light text-2xl">

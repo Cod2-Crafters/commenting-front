@@ -30,14 +30,11 @@ const SpaceForm = ({ ownerId, guestId, ownerProfileData, guestProfileData }: Spa
   const status = useSelector((state: RootState) => state.conversations.loading)
   const conversations = useSelector((state: RootState) => state.conversations.entities)
 
-  const sendConversationsStatus = useSelector((state: RootState) => state.sendConversations.loading)
-  const sendConversations = useSelector((state: RootState) => state.sendConversations.entities)
+  // const sendConversationsStatus = useSelector((state: RootState) => state.sendConversations.loading)
+  // const sendConversations = useSelector((state: RootState) => state.sendConversations.entities)
 
   const dispatch: AppDispatch = useDispatch()
   const [maxMasterId, setMaxMasterId] = useState(0)
-  const loginUserToken = useSelector((state: RootState) => state.auth.token)
-  const loginUserToken2 = useSelector((state: RootState) => state.auth.user)
-
   const [selectedTab, setSetselectedTab] = useState<'receive' | 'send'>('receive')
 
   const [ownerProfileStateData, SetOwnerProfileStateData] = useState<ProfileSchemaState>()
@@ -110,9 +107,7 @@ const SpaceForm = ({ ownerId, guestId, ownerProfileData, guestProfileData }: Spa
           ownerProfileData: ownerProfileStateData,
         }}
       >
-        <div className="text-red-300 fixed">
-          {/* <p>TOKEN1: {JSON.stringify(loginUserToken)}</p>
-          <p>TOKEN-USER: {JSON.stringify(loginUserToken2)}@</p> */}
+        {/* <div className="text-red-300 fixed">
           <p>{conversationsInfiniteQurey?.status}</p>
           <p>{conversationsInfiniteQurey?.error?.stack}</p>
           <p>#hasNextPage:#{conversationsInfiniteQurey.hasNextPage === true ? 'O' : 'X'}</p>
@@ -120,14 +115,14 @@ const SpaceForm = ({ ownerId, guestId, ownerProfileData, guestProfileData }: Spa
           <p>isLoading#{conversationsInfiniteQurey.isLoading === true ? 'O' : 'X'}</p>
           <p>maxMstId: {maxMasterId}</p>
           <p>{conversationsInfiniteQurey?.data?.pages?.length}</p>
-          {/* <p className='text-green-200'>
+          <p className='text-green-200'>
             {JSON.stringify(conversationsInfiniteQurey?.data?.pages)}
-          </p> */}
-        </div>
+          </p>
+        </div> */}
         <ContentLayout>
           {/* <div className="flex flex-row justify-center min-h-screen bg-background">
           <div className="flex flex-col max-w-[574px] bg-background text-white pt-8 space-y-6 sm:px-2 w-full"> */}
-          <span className="text-green-300">{status.toString()}</span>
+          {/* <span className="text-green-300">{status.toString()}</span> */}
           <div className="flex flex-row justify-between">
             <div className="flex flex-col justify-center ">
               <p className="text-2xl font-semibold">{ownerProfileData?.email}</p>
@@ -157,9 +152,6 @@ const SpaceForm = ({ ownerId, guestId, ownerProfileData, guestProfileData }: Spa
 
             {/* 궁금해요 버튼 */}
             {guestId !== ownerId && <QuestionWriteModifyButton type="write" />}
-            <span>
-              gu:{guestId} @ ow:{ownerId} # {selectedTab}
-            </span>
 
             {guestId == ownerId && (
               <>
@@ -183,20 +175,18 @@ const SpaceForm = ({ ownerId, guestId, ownerProfileData, guestProfileData }: Spa
             <TabsContent value="receive">
               <div className="py-10">
                 <Timeline conversations={conversations} />
-                <div ref={targetRefByRecv}>---</div>
+                <div ref={targetRefByRecv}><pre></pre></div>
               </div>
             </TabsContent>
             {ownerId === guestId && (
               <TabsContent value="send">
                 <div className="py-10">
                   <Timeline conversations={conversations} />
-                  <div ref={targetRefBySend}>====</div>
+                  <div ref={targetRefBySend}><pre></pre></div>
                 </div>
               </TabsContent>
             )}
           </Tabs>
-          {/* </div>
-        </div> */}
         </ContentLayout>
       </SpaceContext.Provider>
     </>

@@ -38,7 +38,7 @@ const QuestionWriteModifyButton = ({ type, modifyMstId }: QuestionWriteModifyBut
           isOpen={isOpen}
           trigger={
             <Button className="w-full" variant={'outline'} onClick={() => setIsOpen(true)}>
-              질문-수정
+              수정(질문)
             </Button>
           }
           // targetConvesation={modifyConversation}

@@ -170,7 +170,7 @@ export default async function RootLayout({
             <ReactQueryProvider>
               <NotificationManager />
               <Header token={session?.user?.token || null} />
-              <div className="pt-16 mt-16 flex-grow">{children}</div>
+              <div className="">{children}</div>
             </ReactQueryProvider>
           </TokenProvider>
         </AuthProvider>

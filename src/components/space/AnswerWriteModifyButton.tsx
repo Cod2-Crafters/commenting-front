@@ -45,7 +45,7 @@ const AnswerWriteModifyButton = ({ type = 'write', mstId, modifyConversation, on
           isOpen={isOpen}
           trigger={
             <Button className="w-full" variant={'outline'} onClick={() => setIsOpen(true)}>
-              답변-수정
+              수정(답변)
             </Button>
           }
           targetConvesation={modifyConversation}

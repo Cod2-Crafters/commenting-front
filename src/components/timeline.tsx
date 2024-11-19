@@ -33,14 +33,14 @@ const Timeline = ({ conversations, ...props }: TimelineProps) => {
   const { spaceOwnerId, showerGuestId, writeMaxMstId } = useContext(SpaceContext)
   const receiveConversationsStatus = useSelector((state: RootState) => state.conversations.loading)
 
-  const [dropDownMenuIsOpen, setDropDownMenuIsOpen] = useState(false);
+  // const [dropDownMenuIsOpen, setDropDownMenuIsOpen] = useState(false);
 
 
   return (
     <div>
-      <p>
+      {/* <p>
         스페이스 주인: {spaceOwnerId} / 로그인한 조회자: {showerGuestId} / maxMstId: {writeMaxMstId} / {receiveConversationsStatus.toString()}
-      </p>
+      </p> */}
       {receiveConversationsStatus == 'successed' && conversations?.length == 0 && <h2>작성된 질문이 없습니다.</h2>}
       {conversations?.map((conversation, index) => {
         return (
@@ -58,8 +58,8 @@ const Timeline = ({ conversations, ...props }: TimelineProps) => {
                   </AvatarFallback>
                 </Avatar>
                 <b className="text-base font-semibold">
-                  {getNickname(conversation.writerId == showerGuestId || conversation.ownerId == conversation.writerId ? conversation.nickname : null)} {`(${conversation.mstId}, ${conversation.conId}) ow${conversation.ownerId} gu: ${conversation.guestId}`} / wr:${conversation.writerId}
-                  {conversation.isQuestion && ' Q'}
+                  {getNickname(conversation.writerId == showerGuestId || conversation.ownerId == conversation.writerId ? conversation.nickname : null)}
+                  {/* ow${conversation.ownerId} gu: ${conversation.guestId}`} / wr:${conversation.writerId} */}
                 </b>
                 <span className="text-sm font-medium text-muted">{getTimeDiffText(conversation.modifiedAt)}</span>
               </div>
@@ -70,7 +70,7 @@ const Timeline = ({ conversations, ...props }: TimelineProps) => {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       {/* ... 아이콘 버튼 */}
-                      <Button className="test" variant={'outline'} size={'icon'}>
+                      <Button className="test" variant={'ghost'} size={'icon'}>
                         <MoreIcon width={24} height={24} />
                       </Button>
                     </DropdownMenuTrigger>

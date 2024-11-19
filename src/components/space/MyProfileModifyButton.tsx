@@ -8,15 +8,12 @@ interface MyProfileModifyButtonProps {
 }
 
 const MyProfileModifyButton = ({ label, data }: MyProfileModifyButtonProps) => {
-
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false)
 
   return (
     <>
-    <MyProfileInfoDialog label={label} loadedProfileData={data} isOpen={isOpen} setIsOpen={setIsOpen} />
-    <p>openstatus:{isOpen.toString()}</p>
+      <MyProfileInfoDialog label={label} loadedProfileData={data} isOpen={isOpen} setIsOpen={setIsOpen} />
     </>
- 
   )
 }
 

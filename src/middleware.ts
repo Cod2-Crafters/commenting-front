@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/api/login')  ||
     pathname.startsWith('/auth/login')  || 
     pathname.startsWith('/api/logout')  ||
-    pathname.startsWith('/api/validtoken') 
+    pathname.startsWith('/api/validtoken')
   ) {
     const response = NextResponse.next();
     console.log('토큰검증 예외처리:' + pathname)

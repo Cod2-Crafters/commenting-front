@@ -13,7 +13,7 @@ const NotificationPages = async () => {
 
     return (
         <>
-            {session?.user && session?.user?.userId ? <NewNotificationList guestId={session.user.userId} /> : redirect('/auth/login')}
+            {session?.user && session?.user?.userid ? <NewNotificationList guestId={session.user.userid} /> : redirect('/auth/login')}
         </>
     )
 }
