@@ -20,8 +20,6 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLab
 import { APIResponseMsg, ConversationQuestionLikeItResponse, ConversationQuestionLikeItSchemaState, ConversationSchema, ConversationSchemaState } from '@/schemas'
 import QuestionWriteModifyButton from './space/QuestionWriteModifyButton'
 import AnswerWriteModifyButton from './space/AnswerWriteModifyButton'
-import ProfileCard from './profile-card'
-import Link from 'next/link'
 
 interface TimelineProps {
   conversations: ConversationSchemaState[]
