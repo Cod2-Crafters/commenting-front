@@ -29,15 +29,15 @@ export function getNickname(nickname?: string) {
   return nickname
 }
 
-export function convertRecursiveNullToEmptyString(obj: any) {
-  for (let key in obj) {
-    if (obj[key] === null) {
-      obj[key] = ''
-    } else if (typeof obj[key] === 'object') {
-      convertRecursiveNullToEmptyString(obj[key]) // 객체인 경우 재귀적으로 처리
-    }
-  }
-}
+// export function convertRecursiveNullToEmptyString(obj: any) {
+//   for (let key in obj) {
+//     if (obj[key] === null) {
+//       obj[key] = ''
+//     } else if (typeof obj[key] === 'object') {
+//       convertRecursiveNullToEmptyString(obj[key]) // 객체인 경우 재귀적으로 처리
+//     }
+//   }
+// }
 
 
 export function isMySpace(spaceOwnerId: number, showerGuestId: number)

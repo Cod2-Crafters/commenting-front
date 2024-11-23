@@ -25,13 +25,13 @@ const LikeQuestionItemList = ({ questions, loginUserId }: LikeQuestionItemListPr
     setIsOpen(true)
   }
 
-  if (!loginUserId) return null;
+  if (!loginUserId) return null
 
   return (
     <>
-      <span>{isOpen.toString()}</span>
+      {/* <span>{isOpen.toString()}</span>
       <span>{autht}</span>
-      <span className="block my-36">{JSON.stringify(questions)}</span>
+      <span className="block my-36">{JSON.stringify(questions)}</span> */}
       {questions?.map((question) => {
         return <LikeQuestionItem key={question.mstId + '-'} data={question} showDialog={showDialog} loginUserId={loginUserId} />
       })}
