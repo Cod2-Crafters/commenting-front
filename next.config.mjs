@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig = {vercel nextjs 배포 왜 정적 ?
   reactStrictMode: false,
   webpack: (config, { webpack }) => {
     config.module.rules.push({

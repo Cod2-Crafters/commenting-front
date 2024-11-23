@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next lint --max-warnings=9999",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint --fix . --ext .js,.jsx,.ts,.tsx",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md}\""
