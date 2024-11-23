@@ -6,7 +6,7 @@ export async function GET(req, res) {
   }
 
   const { token } = req.query
-  const response = await fetch('http://43.202.121.141:8080/api/subscribe', {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/subscribe`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,
