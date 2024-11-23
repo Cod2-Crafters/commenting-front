@@ -1,7 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'commenting.duckdns.org',
+      },
+    ],
+  },
   webpack: (config, { webpack }) => {
     config.module.rules.push({
       test: /\.svg$/,
