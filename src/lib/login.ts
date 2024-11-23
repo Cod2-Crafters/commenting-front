@@ -214,7 +214,7 @@ export async function updateSession(request: NextRequest) {
 
     // console.log('updatesession!')
 
-    let decodePayload = await decrypt(sessionValue)
+    const decodePayload = await decrypt(sessionValue)
     const { exp } = decodePayload
 
     if (exp <= Math.floor(Date.now() / 1000) + 300) {

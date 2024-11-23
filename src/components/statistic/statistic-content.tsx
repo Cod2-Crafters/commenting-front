@@ -64,7 +64,7 @@ const StatisticContent = ({ ...props }: StatisticContentProps) => {
             <h2 className="text-2xl font-semibold mb-4">질문한 유저리스트</h2>
             <div className="flex flex-row gap-2 w-full overflow-y-auto hidden-scroll hover:scrollbar p-4">
                 {statisticsQuery.data.data.questionedUsers.map((userInfo => {
-                    return <ProfileCard imagePath={getImageUrl(userInfo?.avatarPath)} name={''} imageSize={80} isZoom={true} />
+                    return <ProfileCard key={userInfo?.memberPath} imagePath={getImageUrl(userInfo?.avatarPath)} name={''} imageSize={80} isZoom={true} />
                 }))}
             </div>
           </div>
